@@ -1,0 +1,1052 @@
+From dcd2d05015828de446932f3d9a7fb70994849934 Mon Sep 17 00:00:00 2001
+From: Dean Troyer <dtroyer@gmail.com>
+Date: Fri, 30 Aug 2013 17:55:37 -0500
+Subject: [PATCH] Add object-store show commands
+
+* Add lib.container.show_container() and lib.object.show_object()
+* Add container and object show commands
+
+Change-Id: I963d664c55b59739453345f0f353aa2eaf1bf70e
+---
+ openstackclient/object/v1/container.py             |  29 +-
+ openstackclient/object/v1/lib/container.py         |  36 ++
+ openstackclient/object/v1/lib/object.py            |  51 +++
+ openstackclient/object/v1/object.py                |  34 ++
+ openstackclient/tests/object/test_container.py     |  46 +++
+ openstackclient/tests/object/test_object.py        |  51 +++
+ .../tests/object/v1/lib/test_container.py          |  59 ++-
+ openstackclient/tests/object/v1/lib/test_object.py |  77 +++-
+ setup.cfg                                          | 452 +++++++++++----------
+ 9 files changed, 614 insertions(+), 221 deletions(-)
+
+diff --git a/openstackclient/object/v1/container.py b/openstackclient/object/v1/container.py
+index 8c4db66..68b14fc 100644
+--- a/openstackclient/object/v1/container.py
++++ b/openstackclient/object/v1/container.py
+@@ -17,8 +17,10 @@
+ 
+ 
+ import logging
++import six
+ 
+ from cliff import lister
++from cliff import show
+ 
+ from openstackclient.common import utils
+ from openstackclient.object.v1.lib import container as lib_container
+@@ -91,10 +93,35 @@ class ListContainer(lister.Lister):
+             self.app.client_manager.object.endpoint,
+             **kwargs
+         )
+-        #print "data: %s" % data
+ 
+         return (columns,
+                 (utils.get_dict_properties(
+                     s, columns,
+                     formatters={},
+                 ) for s in data))
++
++
++class ShowContainer(show.ShowOne):
++    """Show container information"""
++
++    log = logging.getLogger(__name__ + '.ShowContainer')
++
++    def get_parser(self, prog_name):
++        parser = super(ShowContainer, self).get_parser(prog_name)
++        parser.add_argument(
++            'container',
++            metavar='<container>',
++            help='Container name to display',
++        )
++        return parser
++
++    def take_action(self, parsed_args):
++        self.log.debug('take_action(%s)' % parsed_args)
++
++        data = lib_container.show_container(
++            self.app.restapi,
++            self.app.client_manager.object.endpoint,
++            parsed_args.container,
++        )
++
++        return zip(*sorted(six.iteritems(data)))
+diff --git a/openstackclient/object/v1/lib/container.py b/openstackclient/object/v1/lib/container.py
+index f30533c..5103d9d 100644
+--- a/openstackclient/object/v1/lib/container.py
++++ b/openstackclient/object/v1/lib/container.py
+@@ -16,6 +16,11 @@
+ 
+ """Object v1 API library"""
+ 
++try:
++    from urllib.parse import urlparse
++except ImportError:
++    from urlparse import urlparse
++
+ 
+ def list_containers(
+     api,
+@@ -75,3 +80,34 @@ def list_containers(
+     url = "%s?%s" % (object_url, query)
+     response = api.request('GET', url)
+     return response.json()
++
++
++def show_container(
++    api,
++    url,
++    container,
++):
++    """Get container details
++
++    :param api: a restapi object
++    :param url: endpoint
++    :param container: name of container to show
++    :returns: dict of returned headers
++    """
++
++    object_url = "%s/%s" % (url, container)
++    url_parts = urlparse(url)
++    response = api.request('HEAD', object_url)
++    data = {
++        'account': url_parts.path.split('/')[-1],
++        'container': container,
++    }
++    data['object_count'] = response.headers.get(
++        'x-container-object-count', None)
++    data['bytes_used'] = response.headers.get('x-container-bytes-used', None)
++    data['read_acl'] = response.headers.get('x-container-read', None)
++    data['write_acl'] = response.headers.get('x-container-write', None)
++    data['sync_to'] = response.headers.get('x-container-sync-to', None)
++    data['sync_key'] = response.headers.get('x-container-sync-key', None)
++
++    return data
+diff --git a/openstackclient/object/v1/lib/object.py b/openstackclient/object/v1/lib/object.py
+index d7c4a1c..8ad5e5a 100644
+--- a/openstackclient/object/v1/lib/object.py
++++ b/openstackclient/object/v1/lib/object.py
+@@ -16,6 +16,13 @@
+ 
+ """Object v1 API library"""
+ 
++import six
++
++try:
++    from urllib.parse import urlparse
++except ImportError:
++    from urlparse import urlparse
++
+ 
+ def list_objects(
+     api,
+@@ -95,3 +102,47 @@ def list_objects(
+     url = "%s/%s?%s" % (object_url, container, query)
+     response = api.request('GET', url)
+     return response.json()
++
++
++def show_object(
++    api,
++    url,
++    container,
++    obj,
++):
++    """Get object details
++
++    :param api: a restapi object
++    :param url: endpoint
++    :param container: container name to get a listing for
++    :returns: dict of object properties
++    """
++
++    object_url = "%s/%s/%s" % (url, container, obj)
++    url_parts = urlparse(url)
++    response = api.request('HEAD', object_url)
++    data = {
++        'account': url_parts.path.split('/')[-1],
++        'container': container,
++        'object': obj,
++    }
++    #print "data: %s" % data
++    data['content-type'] = response.headers.get('content-type', None)
++    if 'content-length' in response.headers:
++        data['content-length'] = response.headers.get('content-length', None)
++    if 'last-modified' in response.headers:
++        data['last-modified'] = response.headers.get('last-modified', None)
++    if 'etag' in response.headers:
++        data['etag'] = response.headers.get('etag', None)
++    if 'x-object-manifest' in response.headers:
++        data['x-object-manifest'] = response.headers.get(
++            'x-object-manifest', None)
++    for key, value in six.iteritems(response.headers):
++        if key.startswith('x-object-meta-'):
++            data[key[len('x-object-meta-'):].title()] = value
++        elif key not in (
++                'content-type', 'content-length', 'last-modified',
++                'etag', 'date', 'x-object-manifest'):
++            data[key.title()] = value
++
++    return data
+diff --git a/openstackclient/object/v1/object.py b/openstackclient/object/v1/object.py
+index c6bd755..426a52a 100644
+--- a/openstackclient/object/v1/object.py
++++ b/openstackclient/object/v1/object.py
+@@ -17,8 +17,10 @@
+ 
+ 
+ import logging
++import six
+ 
+ from cliff import lister
++from cliff import show
+ 
+ from openstackclient.common import utils
+ from openstackclient.object.v1.lib import object as lib_object
+@@ -116,3 +118,35 @@ class ListObject(lister.Lister):
+                     s, columns,
+                     formatters={},
+                 ) for s in data))
++
++
++class ShowObject(show.ShowOne):
++    """Show object information"""
++
++    log = logging.getLogger(__name__ + '.ShowObject')
++
++    def get_parser(self, prog_name):
++        parser = super(ShowObject, self).get_parser(prog_name)
++        parser.add_argument(
++            'container',
++            metavar='<container>',
++            help='Container name for object to display',
++        )
++        parser.add_argument(
++            'object',
++            metavar='<object>',
++            help='Object name to display',
++        )
++        return parser
++
++    def take_action(self, parsed_args):
++        self.log.debug('take_action(%s)' % parsed_args)
++
++        data = lib_object.show_object(
++            self.app.restapi,
++            self.app.client_manager.object.endpoint,
++            parsed_args.container,
++            parsed_args.object,
++        )
++
++        return zip(*sorted(six.iteritems(data)))
+diff --git a/openstackclient/tests/object/test_container.py b/openstackclient/tests/object/test_container.py
+index 9b53e36..24d6763 100644
+--- a/openstackclient/tests/object/test_container.py
++++ b/openstackclient/tests/object/test_container.py
+@@ -313,3 +313,49 @@ class TestContainerList(TestObject):
+             (object_fakes.container_name_3, ),
+         )
+         self.assertEqual(tuple(data), datalist)
++
++
++@mock.patch(
++    'openstackclient.object.v1.container.lib_container.show_container'
++)
++class TestContainerShow(TestObject):
++
++    def setUp(self):
++        super(TestContainerShow, self).setUp()
++
++        # Get the command object to test
++        self.cmd = container.ShowContainer(self.app, None)
++
++    def test_container_show(self, c_mock):
++        c_mock.return_value = copy.deepcopy(object_fakes.CONTAINER)
++
++        arglist = [
++            object_fakes.container_name,
++        ]
++        verifylist = [
++            ('container', object_fakes.container_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        # lib.container.show_container(api, url, container)
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++            **kwargs
++        )
++
++        collist = ('bytes', 'count', 'name')
++        self.assertEqual(columns, collist)
++        datalist = (
++            object_fakes.container_bytes,
++            object_fakes.container_count,
++            object_fakes.container_name,
++        )
++        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/object/test_object.py b/openstackclient/tests/object/test_object.py
+index ddd5b59..1ceb0a5 100644
+--- a/openstackclient/tests/object/test_object.py
++++ b/openstackclient/tests/object/test_object.py
+@@ -360,3 +360,54 @@ class TestObjectList(TestObject):
+             (object_fakes.object_name_2, ),
+         )
+         self.assertEqual(tuple(data), datalist)
++
++
++@mock.patch(
++    'openstackclient.object.v1.object.lib_object.show_object'
++)
++class TestObjectShow(TestObject):
++
++    def setUp(self):
++        super(TestObjectShow, self).setUp()
++
++        # Get the command object to test
++        self.cmd = obj.ShowObject(self.app, None)
++
++    def test_object_show(self, c_mock):
++        c_mock.return_value = copy.deepcopy(object_fakes.OBJECT)
++
++        arglist = [
++            object_fakes.container_name,
++            object_fakes.object_name_1,
++        ]
++        verifylist = [
++            ('container', object_fakes.container_name),
++            ('object', object_fakes.object_name_1),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        # lib.container.show_container(api, url, container)
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++            object_fakes.object_name_1,
++            **kwargs
++        )
++
++        collist = ('bytes', 'content_type', 'hash', 'last_modified', 'name')
++        self.assertEqual(columns, collist)
++        datalist = (
++            object_fakes.object_bytes_1,
++            object_fakes.object_content_type_1,
++            object_fakes.object_hash_1,
++            object_fakes.object_modified_1,
++            object_fakes.object_name_1,
++        )
++        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/object/v1/lib/test_container.py b/openstackclient/tests/object/v1/lib/test_container.py
+index 1c0112c..3b9976a 100644
+--- a/openstackclient/tests/object/v1/lib/test_container.py
++++ b/openstackclient/tests/object/v1/lib/test_container.py
+@@ -15,19 +15,17 @@
+ 
+ """Test Object API library module"""
+ 
+-from __future__ import unicode_literals
+-
+ import mock
+ 
+-
+ from openstackclient.object.v1.lib import container as lib_container
+ from openstackclient.tests.common import test_restapi as restapi
+ from openstackclient.tests import fakes
+ from openstackclient.tests import utils
+ 
+ 
++fake_account = 'q12we34r'
+ fake_auth = '11223344556677889900'
+-fake_url = 'http://gopher.com'
++fake_url = 'http://gopher.com/v1/' + fake_account
+ 
+ fake_container = 'rainbarrel'
+ 
+@@ -38,18 +36,18 @@ class FakeClient(object):
+         self.token = fake_auth
+ 
+ 
+-class TestObject(utils.TestCommand):
++class TestContainer(utils.TestCommand):
+ 
+     def setUp(self):
+-        super(TestObject, self).setUp()
++        super(TestContainer, self).setUp()
+         self.app.client_manager = fakes.FakeClientManager()
+         self.app.client_manager.object = FakeClient()
+         self.app.restapi = mock.MagicMock()
+ 
+ 
+-class TestObjectListContainers(TestObject):
++class TestContainerList(TestContainer):
+ 
+-    def test_list_containers_no_options(self):
++    def test_container_list_no_options(self):
+         resp = [{'name': 'is-name'}]
+         self.app.restapi.request.return_value = restapi.FakeResponse(data=resp)
+ 
+@@ -65,7 +63,7 @@ class TestObjectListContainers(TestObject):
+         )
+         self.assertEqual(data, resp)
+ 
+-    def test_list_containers_marker(self):
++    def test_container_list_marker(self):
+         resp = [{'name': 'is-name'}]
+         self.app.restapi.request.return_value = restapi.FakeResponse(data=resp)
+ 
+@@ -82,7 +80,7 @@ class TestObjectListContainers(TestObject):
+         )
+         self.assertEqual(data, resp)
+ 
+-    def test_list_containers_limit(self):
++    def test_container_list_limit(self):
+         resp = [{'name': 'is-name'}]
+         self.app.restapi.request.return_value = restapi.FakeResponse(data=resp)
+ 
+@@ -99,7 +97,7 @@ class TestObjectListContainers(TestObject):
+         )
+         self.assertEqual(data, resp)
+ 
+-    def test_list_containers_end_marker(self):
++    def test_container_list_end_marker(self):
+         resp = [{'name': 'is-name'}]
+         self.app.restapi.request.return_value = restapi.FakeResponse(data=resp)
+ 
+@@ -116,7 +114,7 @@ class TestObjectListContainers(TestObject):
+         )
+         self.assertEqual(data, resp)
+ 
+-    def test_list_containers_prefix(self):
++    def test_container_list_prefix(self):
+         resp = [{'name': 'is-name'}]
+         self.app.restapi.request.return_value = restapi.FakeResponse(data=resp)
+ 
+@@ -133,7 +131,7 @@ class TestObjectListContainers(TestObject):
+         )
+         self.assertEqual(data, resp)
+ 
+-    def test_list_containers_full_listing(self):
++    def test_container_list_full_listing(self):
+ 
+         def side_effect(*args, **kwargs):
+             rv = self.app.restapi.request.return_value
+@@ -159,3 +157,38 @@ class TestObjectListContainers(TestObject):
+             fake_url + '?format=json&marker=is-name',
+         )
+         self.assertEqual(data, resp)
++
++
++class TestContainerShow(TestContainer):
++
++    def test_container_show_no_options(self):
++        resp = {
++            'x-container-object-count': 1,
++            'x-container-bytes-used': 577,
++        }
++        self.app.restapi.request.return_value = \
++            restapi.FakeResponse(headers=resp)
++
++        data = lib_container.show_container(
++            self.app.restapi,
++            self.app.client_manager.object.endpoint,
++            'is-name',
++        )
++
++        # Check expected values
++        self.app.restapi.request.assert_called_with(
++            'HEAD',
++            fake_url + '/is-name',
++        )
++
++        data_expected = {
++            'account': fake_account,
++            'container': 'is-name',
++            'object_count': 1,
++            'bytes_used': 577,
++            'read_acl': None,
++            'write_acl': None,
++            'sync_to': None,
++            'sync_key': None,
++        }
++        self.assertEqual(data, data_expected)
+diff --git a/openstackclient/tests/object/v1/lib/test_object.py b/openstackclient/tests/object/v1/lib/test_object.py
+index b4793cc..0104183 100644
+--- a/openstackclient/tests/object/v1/lib/test_object.py
++++ b/openstackclient/tests/object/v1/lib/test_object.py
+@@ -15,8 +15,6 @@
+ 
+ """Test Object API library module"""
+ 
+-from __future__ import unicode_literals
+-
+ import mock
+ 
+ from openstackclient.object.v1.lib import object as lib_object
+@@ -25,10 +23,12 @@ from openstackclient.tests import fakes
+ from openstackclient.tests import utils
+ 
+ 
++fake_account = 'q12we34r'
+ fake_auth = '11223344556677889900'
+-fake_url = 'http://gopher.com'
++fake_url = 'http://gopher.com/v1/' + fake_account
+ 
+ fake_container = 'rainbarrel'
++fake_object = 'raindrop'
+ 
+ 
+ class FakeClient(object):
+@@ -203,3 +203,74 @@ class TestObjectListObjects(TestObject):
+             fake_url + '/' + fake_container + '?format=json&marker=is-name',
+         )
+         self.assertEqual(data, resp)
++
++
++class TestObjectShowObjects(TestObject):
++
++    def test_object_show_no_options(self):
++        resp = {
++            'content-type': 'text/alpha',
++        }
++        self.app.restapi.request.return_value = \
++            restapi.FakeResponse(headers=resp)
++
++        data = lib_object.show_object(
++            self.app.restapi,
++            self.app.client_manager.object.endpoint,
++            fake_container,
++            fake_object,
++        )
++
++        # Check expected values
++        self.app.restapi.request.assert_called_with(
++            'HEAD',
++            fake_url + '/%s/%s' % (fake_container, fake_object),
++        )
++
++        data_expected = {
++            'account': fake_account,
++            'container': fake_container,
++            'object': fake_object,
++            'content-type': 'text/alpha',
++        }
++        self.assertEqual(data, data_expected)
++
++    def test_object_show_all_options(self):
++        resp = {
++            'content-type': 'text/alpha',
++            'content-length': 577,
++            'last-modified': '20130101',
++            'etag': 'qaz',
++            'x-object-manifest': None,
++            'x-object-meta-wife': 'Wilma',
++            'x-tra-header': 'yabba-dabba-do',
++        }
++        self.app.restapi.request.return_value = \
++            restapi.FakeResponse(headers=resp)
++
++        data = lib_object.show_object(
++            self.app.restapi,
++            self.app.client_manager.object.endpoint,
++            fake_container,
++            fake_object,
++        )
++
++        # Check expected values
++        self.app.restapi.request.assert_called_with(
++            'HEAD',
++            fake_url + '/%s/%s' % (fake_container, fake_object),
++        )
++
++        data_expected = {
++            'account': fake_account,
++            'container': fake_container,
++            'object': fake_object,
++            'content-type': 'text/alpha',
++            'content-length': 577,
++            'last-modified': '20130101',
++            'etag': 'qaz',
++            'x-object-manifest': None,
++            'Wife': 'Wilma',
++            'X-Tra-Header': 'yabba-dabba-do',
++        }
++        self.assertEqual(data, data_expected)
+diff --git a/setup.cfg b/setup.cfg
+index b36daf3..48f7b76 100644
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -22,210 +22,254 @@ packages =
+ 	openstackclient
+ 
+ [entry_points]
+-console_scripts = 
+-	openstack = openstackclient.shell:main
+-openstack.cli = 
+-openstack.common = 
+-	limits_show = openstackclient.common.limits:ShowLimits
+-	quota_set = openstackclient.common.quota:SetQuota
+-	quota_show = openstackclient.common.quota:ShowQuota
+-openstack.compute.v2 = 
+-	agent_create = openstackclient.compute.v2.agent:CreateAgent
+-	agent_delete = openstackclient.compute.v2.agent:DeleteAgent
+-	agent_list = openstackclient.compute.v2.agent:ListAgent
+-	agent_set = openstackclient.compute.v2.agent:SetAgent
+-	aggregate_add_host = openstackclient.compute.v2.aggregate:AddAggregateHost
+-	aggregate_create = openstackclient.compute.v2.aggregate:CreateAggregate
+-	aggregate_delete = openstackclient.compute.v2.aggregate:DeleteAggregate
+-	aggregate_list = openstackclient.compute.v2.aggregate:ListAggregate
+-	aggregate_remove_host = openstackclient.compute.v2.aggregate:RemoveAggregateHost
+-	aggregate_set = openstackclient.compute.v2.aggregate:SetAggregate
+-	aggregate_show = openstackclient.compute.v2.aggregate:ShowAggregate
+-	compute_service_list = openstackclient.compute.v2.service:ListService
+-	compute_service_set = openstackclient.compute.v2.service:SetService
+-	console_log_show = openstackclient.compute.v2.console:ShowConsoleLog
+-	console_url_show = openstackclient.compute.v2.console:ShowConsoleURL
+-	flavor_create = openstackclient.compute.v2.flavor:CreateFlavor
+-	flavor_delete = openstackclient.compute.v2.flavor:DeleteFlavor
+-	flavor_list = openstackclient.compute.v2.flavor:ListFlavor
+-	flavor_show = openstackclient.compute.v2.flavor:ShowFlavor
+-	host_list = openstackclient.compute.v2.host:ListHost
+-	host_show = openstackclient.compute.v2.host:ShowHost
+-	hypervisor_list = openstackclient.compute.v2.hypervisor:ListHypervisor
+-	hypervisor_show = openstackclient.compute.v2.hypervisor:ShowHypervisor
+-	ip_fixed_add = openstackclient.compute.v2.fixedip:AddFixedIP
+-	ip_fixed_remove = openstackclient.compute.v2.fixedip:RemoveFixedIP
+-	ip_floating_add = openstackclient.compute.v2.floatingip:AddFloatingIP
+-	ip_floating_create = openstackclient.compute.v2.floatingip:CreateFloatingIP
+-	ip_floating_delete = openstackclient.compute.v2.floatingip:DeleteFloatingIP
+-	ip_floating_list = openstackclient.compute.v2.floatingip:ListFloatingIP
+-	ip_floating_remove = openstackclient.compute.v2.floatingip:RemoveFloatingIP
+-	ip_floating_pool_list = openstackclient.compute.v2.floatingippool:ListFloatingIPPool
+-	keypair_create = openstackclient.compute.v2.keypair:CreateKeypair
+-	keypair_delete = openstackclient.compute.v2.keypair:DeleteKeypair
+-	keypair_list = openstackclient.compute.v2.keypair:ListKeypair
+-	keypair_show = openstackclient.compute.v2.keypair:ShowKeypair
+-	project_usage_list = openstackclient.compute.v2.usage:ListUsage
+-	security_group_create = openstackclient.compute.v2.security_group:CreateSecurityGroup
+-	security_group_delete = openstackclient.compute.v2.security_group:DeleteSecurityGroup
+-	security_group_list = openstackclient.compute.v2.security_group:ListSecurityGroup
+-	security_group_set = openstackclient.compute.v2.security_group:SetSecurityGroup
+-	security_group_show = openstackclient.compute.v2.security_group:ShowSecurityGroup
+-	security_group_rule_create = openstackclient.compute.v2.security_group:CreateSecurityGroupRule
+-	security_group_rule_delete = openstackclient.compute.v2.security_group:DeleteSecurityGroupRule
+-	security_group_rule_list = openstackclient.compute.v2.security_group:ListSecurityGroupRule
+-	server_add_security_group = openstackclient.compute.v2.server:AddServerSecurityGroup
+-	server_add_volume = openstackclient.compute.v2.server:AddServerVolume
+-	server_create = openstackclient.compute.v2.server:CreateServer
+-	server_delete = openstackclient.compute.v2.server:DeleteServer
+-	server_list = openstackclient.compute.v2.server:ListServer
+-	server_lock = openstackclient.compute.v2.server:LockServer
+-	server_migrate = openstackclient.compute.v2.server:MigrateServer
+-	server_pause = openstackclient.compute.v2.server:PauseServer
+-	server_reboot = openstackclient.compute.v2.server:RebootServer
+-	server_rebuild = openstackclient.compute.v2.server:RebuildServer
+-	server_remove_security_group = openstackclient.compute.v2.server:RemoveServerSecurityGroup
+-	server_remove_volume = openstackclient.compute.v2.server:RemoveServerVolume
+-	server_rescue = openstackclient.compute.v2.server:RescueServer
+-	server_resize = openstackclient.compute.v2.server:ResizeServer
+-	server_resume = openstackclient.compute.v2.server:ResumeServer
+-	server_set = openstackclient.compute.v2.server:SetServer
+-	server_show = openstackclient.compute.v2.server:ShowServer
+-	server_ssh = openstackclient.compute.v2.server:SshServer
+-	server_suspend = openstackclient.compute.v2.server:SuspendServer
+-	server_unlock = openstackclient.compute.v2.server:UnlockServer
+-	server_unpause = openstackclient.compute.v2.server:UnpauseServer
+-	server_unrescue = openstackclient.compute.v2.server:UnrescueServer
+-	server_unset = openstackclient.compute.v2.server:UnsetServer
+-openstack.identity.v2_0 = 
+-	ec2_credentials_create = openstackclient.identity.v2_0.ec2creds:CreateEC2Creds
+-	ec2_credentials_delete = openstackclient.identity.v2_0.ec2creds:DeleteEC2Creds
+-	ec2_credentials_list = openstackclient.identity.v2_0.ec2creds:ListEC2Creds
+-	ec2_credentials_show = openstackclient.identity.v2_0.ec2creds:ShowEC2Creds
+-	endpoint_create = openstackclient.identity.v2_0.endpoint:CreateEndpoint
+-	endpoint_delete = openstackclient.identity.v2_0.endpoint:DeleteEndpoint
+-	endpoint_list = openstackclient.identity.v2_0.endpoint:ListEndpoint
+-	endpoint_show = openstackclient.identity.v2_0.endpoint:ShowEndpoint
+-	project_create = openstackclient.identity.v2_0.project:CreateProject
+-	project_delete = openstackclient.identity.v2_0.project:DeleteProject
+-	project_list = openstackclient.identity.v2_0.project:ListProject
+-	project_set = openstackclient.identity.v2_0.project:SetProject
+-	project_show = openstackclient.identity.v2_0.project:ShowProject
+-	role_add = openstackclient.identity.v2_0.role:AddRole
+-	role_create = openstackclient.identity.v2_0.role:CreateRole
+-	role_delete = openstackclient.identity.v2_0.role:DeleteRole
+-	role_list =openstackclient.identity.v2_0.role:ListRole
+-	role_remove = openstackclient.identity.v2_0.role:RemoveRole
+-	role_show =openstackclient.identity.v2_0.role:ShowRole
+-	service_create = openstackclient.identity.v2_0.service:CreateService
+-	service_delete = openstackclient.identity.v2_0.service:DeleteService
+-	service_list =openstackclient.identity.v2_0.service:ListService
+-	service_show =openstackclient.identity.v2_0.service:ShowService
+-	user_role_list = openstackclient.identity.v2_0.role:ListUserRole
+-	user_create = openstackclient.identity.v2_0.user:CreateUser
+-	user_delete = openstackclient.identity.v2_0.user:DeleteUser
+-	user_list = openstackclient.identity.v2_0.user:ListUser
+-	user_set = openstackclient.identity.v2_0.user:SetUser
+-	user_show = openstackclient.identity.v2_0.user:ShowUser
+-openstack.identity.v3 = 
+-	access_token_authenticate = openstackclient.identity.v3.token:AuthenticateAccessToken
+-	access_token_create = openstackclient.identity.v3.token:CreateAccessToken
+-	access_token_delete = openstackclient.identity.v3.token:DeleteAccessToken
+-	access_token_list = openstackclient.identity.v3.token:ListAccessToken
+-	consumer_create = openstackclient.identity.v3.consumer:CreateConsumer
+-	consumer_delete = openstackclient.identity.v3.consumer:DeleteConsumer
+-	consumer_list = openstackclient.identity.v3.consumer:ListConsumer
+-	consumer_set = openstackclient.identity.v3.consumer:SetConsumer
+-	consumer_show = openstackclient.identity.v3.consumer:ShowConsumer
+-	credential_create = openstackclient.identity.v3.credential:CreateCredential
+-	credential_delete = openstackclient.identity.v3.credential:DeleteCredential
+-	credential_list = openstackclient.identity.v3.credential:ListCredential
+-	credential_set = openstackclient.identity.v3.credential:SetCredential
+-	credential_show = openstackclient.identity.v3.credential:ShowCredential
+-	domain_create = openstackclient.identity.v3.domain:CreateDomain
+-	domain_delete = openstackclient.identity.v3.domain:DeleteDomain
+-	domain_list = openstackclient.identity.v3.domain:ListDomain
+-	domain_set = openstackclient.identity.v3.domain:SetDomain
+-	domain_show = openstackclient.identity.v3.domain:ShowDomain
+-	endpoint_create = openstackclient.identity.v3.endpoint:CreateEndpoint
+-	endpoint_delete = openstackclient.identity.v3.endpoint:DeleteEndpoint
+-	endpoint_set = openstackclient.identity.v3.endpoint:SetEndpoint
+-	endpoint_show = openstackclient.identity.v3.endpoint:ShowEndpoint
+-	endpoint_list = openstackclient.identity.v3.endpoint:ListEndpoint
+-	group_add_user = openstackclient.identity.v3.group:AddUserToGroup
+-	group_contains_user = openstackclient.identity.v3.group:CheckUserInGroup
+-	group_create = openstackclient.identity.v3.group:CreateGroup
+-	group_delete = openstackclient.identity.v3.group:DeleteGroup
+-	group_list = openstackclient.identity.v3.group:ListGroup
+-	group_remove_user = openstackclient.identity.v3.group:RemoveUserFromGroup
+-	group_set = openstackclient.identity.v3.group:SetGroup
+-	group_show = openstackclient.identity.v3.group:ShowGroup
+-	policy_create = openstackclient.identity.v3.policy:CreatePolicy
+-	policy_delete = openstackclient.identity.v3.policy:DeletePolicy
+-	policy_list = openstackclient.identity.v3.policy:ListPolicy
+-	policy_set = openstackclient.identity.v3.policy:SetPolicy
+-	policy_show = openstackclient.identity.v3.policy:ShowPolicy
+-	project_create = openstackclient.identity.v3.project:CreateProject
+-	project_delete = openstackclient.identity.v3.project:DeleteProject
+-	project_list = openstackclient.identity.v3.project:ListProject
+-	project_set = openstackclient.identity.v3.project:SetProject
+-	project_show = openstackclient.identity.v3.project:ShowProject
+-	request_token_authorize = openstackclient.identity.v3.token:AuthorizeRequestToken
+-	request_token_create = openstackclient.identity.v3.token:CreateRequestToken
+-	role_add = openstackclient.identity.v3.role:AddRole
+-	role_create = openstackclient.identity.v3.role:CreateRole
+-	role_delete = openstackclient.identity.v3.role:DeleteRole
+-	role_list = openstackclient.identity.v3.role:ListRole
+-	role_remove = openstackclient.identity.v3.role:RemoveRole
+-	role_show = openstackclient.identity.v3.role:ShowRole
+-	role_set = openstackclient.identity.v3.role:SetRole
+-	service_create = openstackclient.identity.v3.service:CreateService
+-	service_delete = openstackclient.identity.v3.service:DeleteService
+-	service_list = openstackclient.identity.v3.service:ListService
+-	service_show = openstackclient.identity.v3.service:ShowService
+-	service_set = openstackclient.identity.v3.service:SetService
+-	user_create = openstackclient.identity.v3.user:CreateUser
+-	user_delete = openstackclient.identity.v3.user:DeleteUser
+-	user_list = openstackclient.identity.v3.user:ListUser
+-	user_set = openstackclient.identity.v3.user:SetUser
+-	user_show = openstackclient.identity.v3.user:ShowUser
+-openstack.image.v1 = 
+-	image_create = openstackclient.image.v1.image:CreateImage
+-	image_delete = openstackclient.image.v1.image:DeleteImage
+-	image_list = openstackclient.image.v1.image:ListImage
+-	image_save = openstackclient.image.v1.image:SaveImage
+-	image_set = openstackclient.image.v1.image:SetImage
+-	image_show = openstackclient.image.v1.image:ShowImage
+-openstack.image.v2 = 
+-	image_delete = openstackclient.image.v2.image:DeleteImage
+-	image_list = openstackclient.image.v2.image:ListImage
+-	image_save = openstackclient.image.v2.image:SaveImage
+-	image_show = openstackclient.image.v2.image:ShowImage
+-openstack.object_store.v1 = 
+-	container_list = openstackclient.object.v1.container:ListContainer
+-	object_list = openstackclient.object.v1.object:ListObject
+-openstack.volume.v1 = 
+-	snapshot_create = openstackclient.volume.v1.snapshot:CreateSnapshot
+-	snapshot_delete = openstackclient.volume.v1.snapshot:DeleteSnapshot
+-	snapshot_list = openstackclient.volume.v1.snapshot:ListSnapshot
+-	snapshot_set = openstackclient.volume.v1.snapshot:SetSnapshot
+-	snapshot_show = openstackclient.volume.v1.snapshot:ShowSnapshot
+-	backup_create = openstackclient.volume.v1.backup:CreateBackup
+-	backup_delete = openstackclient.volume.v1.backup:DeleteBackup
+-	backup_list = openstackclient.volume.v1.backup:ListBackup
+-	backup_restore = openstackclient.volume.v1.backup:RestoreBackup
+-	backup_show = openstackclient.volume.v1.backup:ShowBackup
+-	volume_create = openstackclient.volume.v1.volume:CreateVolume
+-	volume_delete = openstackclient.volume.v1.volume:DeleteVolume
+-	volume_list = openstackclient.volume.v1.volume:ListVolume
+-	volume_set = openstackclient.volume.v1.volume:SetVolume
+-	volume_show = openstackclient.volume.v1.volume:ShowVolume
+-	volume_unset = openstackclient.volume.v1.volume:UnsetVolume
+-	volume_type_create = openstackclient.volume.v1.type:CreateVolumeType
+-	volume_type_delete = openstackclient.volume.v1.type:DeleteVolumeType
+-	volume_type_list = openstackclient.volume.v1.type:ListVolumeType
+-	volume_type_set = openstackclient.volume.v1.type:SetVolumeType
+-	volume_type_unset = openstackclient.volume.v1.type:UnsetVolumeType
++console_scripts =
++    openstack = openstackclient.shell:main
++
++openstack.cli =
++
++openstack.common =
++    limits_show = openstackclient.common.limits:ShowLimits
++    quota_set = openstackclient.common.quota:SetQuota
++    quota_show = openstackclient.common.quota:ShowQuota
++
++openstack.compute.v2 =
++    agent_create = openstackclient.compute.v2.agent:CreateAgent
++    agent_delete = openstackclient.compute.v2.agent:DeleteAgent
++    agent_list = openstackclient.compute.v2.agent:ListAgent
++    agent_set = openstackclient.compute.v2.agent:SetAgent
++
++    aggregate_add_host = openstackclient.compute.v2.aggregate:AddAggregateHost
++    aggregate_create = openstackclient.compute.v2.aggregate:CreateAggregate
++    aggregate_delete = openstackclient.compute.v2.aggregate:DeleteAggregate
++    aggregate_list = openstackclient.compute.v2.aggregate:ListAggregate
++    aggregate_remove_host = openstackclient.compute.v2.aggregate:RemoveAggregateHost
++    aggregate_set = openstackclient.compute.v2.aggregate:SetAggregate
++    aggregate_show = openstackclient.compute.v2.aggregate:ShowAggregate
++
++    compute_service_list = openstackclient.compute.v2.service:ListService
++    compute_service_set = openstackclient.compute.v2.service:SetService
++
++    console_log_show = openstackclient.compute.v2.console:ShowConsoleLog
++    console_url_show = openstackclient.compute.v2.console:ShowConsoleURL
++
++    flavor_create = openstackclient.compute.v2.flavor:CreateFlavor
++    flavor_delete = openstackclient.compute.v2.flavor:DeleteFlavor
++    flavor_list = openstackclient.compute.v2.flavor:ListFlavor
++    flavor_show = openstackclient.compute.v2.flavor:ShowFlavor
++
++    host_list = openstackclient.compute.v2.host:ListHost
++    host_show = openstackclient.compute.v2.host:ShowHost
++
++    hypervisor_list = openstackclient.compute.v2.hypervisor:ListHypervisor
++    hypervisor_show = openstackclient.compute.v2.hypervisor:ShowHypervisor
++
++    ip_fixed_add = openstackclient.compute.v2.fixedip:AddFixedIP
++    ip_fixed_remove = openstackclient.compute.v2.fixedip:RemoveFixedIP
++
++    ip_floating_add = openstackclient.compute.v2.floatingip:AddFloatingIP
++    ip_floating_create = openstackclient.compute.v2.floatingip:CreateFloatingIP
++    ip_floating_delete = openstackclient.compute.v2.floatingip:DeleteFloatingIP
++    ip_floating_list = openstackclient.compute.v2.floatingip:ListFloatingIP
++    ip_floating_remove = openstackclient.compute.v2.floatingip:RemoveFloatingIP
++
++    ip_floating_pool_list = openstackclient.compute.v2.floatingippool:ListFloatingIPPool
++
++    keypair_create = openstackclient.compute.v2.keypair:CreateKeypair
++    keypair_delete = openstackclient.compute.v2.keypair:DeleteKeypair
++    keypair_list = openstackclient.compute.v2.keypair:ListKeypair
++    keypair_show = openstackclient.compute.v2.keypair:ShowKeypair
++
++    project_usage_list = openstackclient.compute.v2.usage:ListUsage
++
++    security_group_create = openstackclient.compute.v2.security_group:CreateSecurityGroup
++    security_group_delete = openstackclient.compute.v2.security_group:DeleteSecurityGroup
++    security_group_list = openstackclient.compute.v2.security_group:ListSecurityGroup
++    security_group_set = openstackclient.compute.v2.security_group:SetSecurityGroup
++    security_group_show = openstackclient.compute.v2.security_group:ShowSecurityGroup
++    security_group_rule_create = openstackclient.compute.v2.security_group:CreateSecurityGroupRule
++    security_group_rule_delete = openstackclient.compute.v2.security_group:DeleteSecurityGroupRule
++    security_group_rule_list = openstackclient.compute.v2.security_group:ListSecurityGroupRule
++
++    server_add_security_group = openstackclient.compute.v2.server:AddServerSecurityGroup
++    server_add_volume = openstackclient.compute.v2.server:AddServerVolume
++    server_create = openstackclient.compute.v2.server:CreateServer
++    server_delete = openstackclient.compute.v2.server:DeleteServer
++    server_list = openstackclient.compute.v2.server:ListServer
++    server_lock = openstackclient.compute.v2.server:LockServer
++    server_migrate = openstackclient.compute.v2.server:MigrateServer
++    server_pause = openstackclient.compute.v2.server:PauseServer
++    server_reboot = openstackclient.compute.v2.server:RebootServer
++    server_rebuild = openstackclient.compute.v2.server:RebuildServer
++    server_remove_security_group = openstackclient.compute.v2.server:RemoveServerSecurityGroup
++    server_remove_volume = openstackclient.compute.v2.server:RemoveServerVolume
++    server_rescue = openstackclient.compute.v2.server:RescueServer
++    server_resize = openstackclient.compute.v2.server:ResizeServer
++    server_resume = openstackclient.compute.v2.server:ResumeServer
++    server_set = openstackclient.compute.v2.server:SetServer
++    server_show = openstackclient.compute.v2.server:ShowServer
++    server_ssh = openstackclient.compute.v2.server:SshServer
++    server_suspend = openstackclient.compute.v2.server:SuspendServer
++    server_unlock = openstackclient.compute.v2.server:UnlockServer
++    server_unpause = openstackclient.compute.v2.server:UnpauseServer
++    server_unrescue = openstackclient.compute.v2.server:UnrescueServer
++    server_unset = openstackclient.compute.v2.server:UnsetServer
++
++openstack.identity.v2_0 =
++    ec2_credentials_create = openstackclient.identity.v2_0.ec2creds:CreateEC2Creds
++    ec2_credentials_delete = openstackclient.identity.v2_0.ec2creds:DeleteEC2Creds
++    ec2_credentials_list = openstackclient.identity.v2_0.ec2creds:ListEC2Creds
++    ec2_credentials_show = openstackclient.identity.v2_0.ec2creds:ShowEC2Creds
++
++    endpoint_create = openstackclient.identity.v2_0.endpoint:CreateEndpoint
++    endpoint_delete = openstackclient.identity.v2_0.endpoint:DeleteEndpoint
++    endpoint_list = openstackclient.identity.v2_0.endpoint:ListEndpoint
++    endpoint_show = openstackclient.identity.v2_0.endpoint:ShowEndpoint
++
++    project_create = openstackclient.identity.v2_0.project:CreateProject
++    project_delete = openstackclient.identity.v2_0.project:DeleteProject
++    project_list = openstackclient.identity.v2_0.project:ListProject
++    project_set = openstackclient.identity.v2_0.project:SetProject
++    project_show = openstackclient.identity.v2_0.project:ShowProject
++
++    role_add = openstackclient.identity.v2_0.role:AddRole
++    role_create = openstackclient.identity.v2_0.role:CreateRole
++    role_delete = openstackclient.identity.v2_0.role:DeleteRole
++    role_list =openstackclient.identity.v2_0.role:ListRole
++    role_remove = openstackclient.identity.v2_0.role:RemoveRole
++    role_show =openstackclient.identity.v2_0.role:ShowRole
++
++    service_create = openstackclient.identity.v2_0.service:CreateService
++    service_delete = openstackclient.identity.v2_0.service:DeleteService
++    service_list =openstackclient.identity.v2_0.service:ListService
++    service_show =openstackclient.identity.v2_0.service:ShowService
++
++    user_role_list = openstackclient.identity.v2_0.role:ListUserRole
++
++    user_create = openstackclient.identity.v2_0.user:CreateUser
++    user_delete = openstackclient.identity.v2_0.user:DeleteUser
++    user_list = openstackclient.identity.v2_0.user:ListUser
++    user_set = openstackclient.identity.v2_0.user:SetUser
++    user_show = openstackclient.identity.v2_0.user:ShowUser
++
++openstack.identity.v3 =
++    access_token_authenticate = openstackclient.identity.v3.token:AuthenticateAccessToken
++    access_token_create = openstackclient.identity.v3.token:CreateAccessToken
++    access_token_delete = openstackclient.identity.v3.token:DeleteAccessToken
++    access_token_list = openstackclient.identity.v3.token:ListAccessToken
++
++    consumer_create = openstackclient.identity.v3.consumer:CreateConsumer
++    consumer_delete = openstackclient.identity.v3.consumer:DeleteConsumer
++    consumer_list = openstackclient.identity.v3.consumer:ListConsumer
++    consumer_set = openstackclient.identity.v3.consumer:SetConsumer
++    consumer_show = openstackclient.identity.v3.consumer:ShowConsumer
++
++    credential_create = openstackclient.identity.v3.credential:CreateCredential
++    credential_delete = openstackclient.identity.v3.credential:DeleteCredential
++    credential_list = openstackclient.identity.v3.credential:ListCredential
++    credential_set = openstackclient.identity.v3.credential:SetCredential
++    credential_show = openstackclient.identity.v3.credential:ShowCredential
++
++    domain_create = openstackclient.identity.v3.domain:CreateDomain
++    domain_delete = openstackclient.identity.v3.domain:DeleteDomain
++    domain_list = openstackclient.identity.v3.domain:ListDomain
++    domain_set = openstackclient.identity.v3.domain:SetDomain
++    domain_show = openstackclient.identity.v3.domain:ShowDomain
++
++    endpoint_create = openstackclient.identity.v3.endpoint:CreateEndpoint
++    endpoint_delete = openstackclient.identity.v3.endpoint:DeleteEndpoint
++    endpoint_set = openstackclient.identity.v3.endpoint:SetEndpoint
++    endpoint_show = openstackclient.identity.v3.endpoint:ShowEndpoint
++    endpoint_list = openstackclient.identity.v3.endpoint:ListEndpoint
++
++    group_add_user = openstackclient.identity.v3.group:AddUserToGroup
++    group_contains_user = openstackclient.identity.v3.group:CheckUserInGroup
++    group_create = openstackclient.identity.v3.group:CreateGroup
++    group_delete = openstackclient.identity.v3.group:DeleteGroup
++    group_list = openstackclient.identity.v3.group:ListGroup
++    group_remove_user = openstackclient.identity.v3.group:RemoveUserFromGroup
++    group_set = openstackclient.identity.v3.group:SetGroup
++    group_show = openstackclient.identity.v3.group:ShowGroup
++
++    policy_create = openstackclient.identity.v3.policy:CreatePolicy
++    policy_delete = openstackclient.identity.v3.policy:DeletePolicy
++    policy_list = openstackclient.identity.v3.policy:ListPolicy
++    policy_set = openstackclient.identity.v3.policy:SetPolicy
++    policy_show = openstackclient.identity.v3.policy:ShowPolicy
++
++    project_create = openstackclient.identity.v3.project:CreateProject
++    project_delete = openstackclient.identity.v3.project:DeleteProject
++    project_list = openstackclient.identity.v3.project:ListProject
++    project_set = openstackclient.identity.v3.project:SetProject
++    project_show = openstackclient.identity.v3.project:ShowProject
++
++    request_token_authorize = openstackclient.identity.v3.token:AuthorizeRequestToken
++    request_token_create = openstackclient.identity.v3.token:CreateRequestToken
++
++    role_add = openstackclient.identity.v3.role:AddRole
++    role_create = openstackclient.identity.v3.role:CreateRole
++    role_delete = openstackclient.identity.v3.role:DeleteRole
++    role_list = openstackclient.identity.v3.role:ListRole
++    role_remove = openstackclient.identity.v3.role:RemoveRole
++    role_show = openstackclient.identity.v3.role:ShowRole
++    role_set = openstackclient.identity.v3.role:SetRole
++
++    service_create = openstackclient.identity.v3.service:CreateService
++    service_delete = openstackclient.identity.v3.service:DeleteService
++    service_list = openstackclient.identity.v3.service:ListService
++    service_show = openstackclient.identity.v3.service:ShowService
++    service_set = openstackclient.identity.v3.service:SetService
++
++    user_create = openstackclient.identity.v3.user:CreateUser
++    user_delete = openstackclient.identity.v3.user:DeleteUser
++    user_list = openstackclient.identity.v3.user:ListUser
++    user_set = openstackclient.identity.v3.user:SetUser
++    user_show = openstackclient.identity.v3.user:ShowUser
++
++openstack.image.v1 =
++    image_create = openstackclient.image.v1.image:CreateImage
++    image_delete = openstackclient.image.v1.image:DeleteImage
++    image_list = openstackclient.image.v1.image:ListImage
++    image_save = openstackclient.image.v1.image:SaveImage
++    image_set = openstackclient.image.v1.image:SetImage
++    image_show = openstackclient.image.v1.image:ShowImage
++
++openstack.image.v2 =
++    image_delete = openstackclient.image.v2.image:DeleteImage
++    image_list = openstackclient.image.v2.image:ListImage
++    image_save = openstackclient.image.v2.image:SaveImage
++    image_show = openstackclient.image.v2.image:ShowImage
++
++openstack.object_store.v1 =
++    container_list = openstackclient.object.v1.container:ListContainer
++    container_show = openstackclient.object.v1.container:ShowContainer
++    object_list = openstackclient.object.v1.object:ListObject
++    object_show = openstackclient.object.v1.object:ShowObject
++
++openstack.volume.v1 =
++    snapshot_create = openstackclient.volume.v1.snapshot:CreateSnapshot
++    snapshot_delete = openstackclient.volume.v1.snapshot:DeleteSnapshot
++    snapshot_list = openstackclient.volume.v1.snapshot:ListSnapshot
++    snapshot_set = openstackclient.volume.v1.snapshot:SetSnapshot
++    snapshot_show = openstackclient.volume.v1.snapshot:ShowSnapshot
++
++    backup_create = openstackclient.volume.v1.backup:CreateBackup
++    backup_delete = openstackclient.volume.v1.backup:DeleteBackup
++    backup_list = openstackclient.volume.v1.backup:ListBackup
++    backup_restore = openstackclient.volume.v1.backup:RestoreBackup
++    backup_show = openstackclient.volume.v1.backup:ShowBackup
++
++    volume_create = openstackclient.volume.v1.volume:CreateVolume
++    volume_delete = openstackclient.volume.v1.volume:DeleteVolume
++    volume_list = openstackclient.volume.v1.volume:ListVolume
++    volume_set = openstackclient.volume.v1.volume:SetVolume
++    volume_show = openstackclient.volume.v1.volume:ShowVolume
++    volume_unset = openstackclient.volume.v1.volume:UnsetVolume
++
++    volume_type_create = openstackclient.volume.v1.type:CreateVolumeType
++    volume_type_delete = openstackclient.volume.v1.type:DeleteVolumeType
++    volume_type_list = openstackclient.volume.v1.type:ListVolumeType
++    volume_type_set = openstackclient.volume.v1.type:SetVolumeType
++    volume_type_unset = openstackclient.volume.v1.type:UnsetVolumeType
+ 
+ [build_sphinx]
+ source-dir = doc/source

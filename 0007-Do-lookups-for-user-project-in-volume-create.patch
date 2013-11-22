@@ -1,0 +1,531 @@
+From 31ab3556307e203977bb31fcfa8a8290e5f7d8fc Mon Sep 17 00:00:00 2001
+From: Dean Troyer <dtroyer@gmail.com>
+Date: Thu, 11 Apr 2013 16:02:53 -0500
+Subject: [PATCH] Do lookups for user, project in volume create
+
+This required https://review.openstack.org/26323 in keystoneclient,
+merged long ago...
+
+Also adds some tests for 'volume create'
+
+Change-Id: I55bededbc20b5dcf2833c59eb2b6b069703d8a9a
+---
+ openstackclient/tests/volume/test_volume.py       |  51 ----
+ openstackclient/tests/volume/v1/__init__.py       |  14 ++
+ openstackclient/tests/volume/v1/fakes.py          |  44 ++++
+ openstackclient/tests/volume/v1/test_volume.py    |  37 +++
+ openstackclient/tests/volume/v1/test_volumecmd.py | 269 ++++++++++++++++++++++
+ openstackclient/volume/v1/volume.py               |  27 ++-
+ 6 files changed, 383 insertions(+), 59 deletions(-)
+ delete mode 100644 openstackclient/tests/volume/test_volume.py
+ create mode 100644 openstackclient/tests/volume/v1/__init__.py
+ create mode 100644 openstackclient/tests/volume/v1/fakes.py
+ create mode 100644 openstackclient/tests/volume/v1/test_volume.py
+ create mode 100644 openstackclient/tests/volume/v1/test_volumecmd.py
+
+diff --git a/openstackclient/tests/volume/test_volume.py b/openstackclient/tests/volume/test_volume.py
+deleted file mode 100644
+index 548fbf7..0000000
+--- a/openstackclient/tests/volume/test_volume.py
++++ /dev/null
+@@ -1,51 +0,0 @@
+-#   Copyright 2013 OpenStack, LLC.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-import mock
+-
+-from openstackclient.common import clientmanager
+-from openstackclient.tests import utils
+-from openstackclient.volume import client as volume_client
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class FakeClient(object):
+-    def __init__(self, endpoint=None, **kwargs):
+-        self.client = mock.MagicMock()
+-        self.client.auth_token = AUTH_TOKEN
+-        self.client.auth_url = AUTH_URL
+-
+-
+-class TestVolume(utils.TestCase):
+-    def setUp(self):
+-        super(TestVolume, self).setUp()
+-
+-        api_version = {"volume": "1"}
+-
+-        volume_client.API_VERSIONS = {
+-            "1": "openstackclient.tests.volume.test_volume.FakeClient"
+-        }
+-
+-        self.cm = clientmanager.ClientManager(token=AUTH_TOKEN,
+-                                              url=AUTH_URL,
+-                                              auth_url=AUTH_URL,
+-                                              api_version=api_version)
+-
+-    def test_make_client(self):
+-        self.assertEqual(self.cm.volume.client.auth_token, AUTH_TOKEN)
+-        self.assertEqual(self.cm.volume.client.auth_url, AUTH_URL)
+diff --git a/openstackclient/tests/volume/v1/__init__.py b/openstackclient/tests/volume/v1/__init__.py
+new file mode 100644
+index 0000000..c534c01
+--- /dev/null
++++ b/openstackclient/tests/volume/v1/__init__.py
+@@ -0,0 +1,14 @@
++#   Copyright 2013 OpenStack Foundation
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
+diff --git a/openstackclient/tests/volume/v1/fakes.py b/openstackclient/tests/volume/v1/fakes.py
+new file mode 100644
+index 0000000..a382dbb
+--- /dev/null
++++ b/openstackclient/tests/volume/v1/fakes.py
+@@ -0,0 +1,44 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import mock
++
++from openstackclient.tests import fakes
++
++volume_id = 'vvvvvvvv-vvvv-vvvv-vvvvvvvv'
++volume_name = 'nigel'
++volume_description = 'Nigel Tufnel'
++volume_size = 120
++volume_metadata = {}
++
++VOLUME = {
++    'id': volume_id,
++    'display_name': volume_name,
++    'display_description': volume_description,
++    'size': volume_size,
++    'status': '',
++    'attach_status': 'detatched',
++    'metadata': volume_metadata,
++}
++
++
++class FakeVolumev1Client(object):
++    def __init__(self, **kwargs):
++        self.volumes = mock.Mock()
++        self.volumes.resource_class = fakes.FakeResource(None, {})
++        self.services = mock.Mock()
++        self.services.resource_class = fakes.FakeResource(None, {})
++        self.auth_token = kwargs['token']
++        self.management_url = kwargs['endpoint']
+diff --git a/openstackclient/tests/volume/v1/test_volume.py b/openstackclient/tests/volume/v1/test_volume.py
+new file mode 100644
+index 0000000..58024f0
+--- /dev/null
++++ b/openstackclient/tests/volume/v1/test_volume.py
+@@ -0,0 +1,37 @@
++#   Copyright 2013 OpenStack, LLC.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
++from openstackclient.tests import utils
++from openstackclient.tests.volume.v1 import fakes
++
++
++AUTH_TOKEN = "foobar"
++AUTH_URL = "http://0.0.0.0"
++
++
++class TestVolumev1(utils.TestCommand):
++    def setUp(self):
++        super(TestVolumev1, self).setUp()
++
++        self.app.client_manager.volume = fakes.FakeVolumev1Client(
++            endpoint=AUTH_URL,
++            token=AUTH_TOKEN,
++        )
++
++        self.app.client_manager.identity = identity_fakes.FakeIdentityv2Client(
++            endpoint=AUTH_URL,
++            token=AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/volume/v1/test_volumecmd.py b/openstackclient/tests/volume/v1/test_volumecmd.py
+new file mode 100644
+index 0000000..1f5ed88
+--- /dev/null
++++ b/openstackclient/tests/volume/v1/test_volumecmd.py
+@@ -0,0 +1,269 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import copy
++
++from openstackclient.tests import fakes
++from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
++from openstackclient.tests.volume.v1 import fakes as volume_fakes
++from openstackclient.tests.volume.v1 import test_volume
++from openstackclient.volume.v1 import volume
++
++
++class TestVolume(test_volume.TestVolumev1):
++
++    def setUp(self):
++        super(TestVolume, self).setUp()
++
++        # Get a shortcut to the VolumeManager Mock
++        self.volumes_mock = self.app.client_manager.volume.volumes
++        self.volumes_mock.reset_mock()
++
++        # Get a shortcut to the TenantManager Mock
++        self.projects_mock = self.app.client_manager.identity.tenants
++        self.projects_mock.reset_mock()
++
++        # Get a shortcut to the UserManager Mock
++        self.users_mock = self.app.client_manager.identity.users
++        self.users_mock.reset_mock()
++
++
++# TODO(dtroyer): The volume create tests are incomplete, only the minimal
++#                options and the options that require additional processing
++#                are implemented at this time.
++
++class TestVolumeCreate(TestVolume):
++
++    def setUp(self):
++        super(TestVolumeCreate, self).setUp()
++
++        self.volumes_mock.create.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(volume_fakes.VOLUME),
++            loaded=True,
++        )
++
++        # Get the command object to test
++        self.cmd = volume.CreateVolume(self.app, None)
++
++    def test_volume_create_min_options(self):
++        arglist = [
++            '--size', str(volume_fakes.volume_size),
++            volume_fakes.volume_name,
++        ]
++        verifylist = [
++            ('size', volume_fakes.volume_size),
++            ('name', volume_fakes.volume_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        #kwargs = {
++        #    'metadata': volume_fakes.volume_metadata,
++        #}
++        # VolumeManager.create(size, snapshot_id=, source_volid=,
++        #                      display_name=, display_description=,
++        #                      volume_type=, user_id=,
++        #                      project_id=, availability_zone=,
++        #                      metadata=, imageRef=)
++        self.volumes_mock.create.assert_called_with(
++            volume_fakes.volume_size,
++            None,
++            None,
++            volume_fakes.volume_name,
++            None,
++            None,
++            None,
++            None,
++            None,
++            None,
++            None,
++        )
++
++        collist = (
++            'attach_status',
++            'display_description',
++            'display_name',
++            'id',
++            'properties',
++            'size',
++            'status',
++        )
++        self.assertEqual(columns, collist)
++        datalist = (
++            'detatched',
++            volume_fakes.volume_description,
++            volume_fakes.volume_name,
++            volume_fakes.volume_id,
++            '',
++            volume_fakes.volume_size,
++            '',
++        )
++        self.assertEqual(data, datalist)
++
++    def test_volume_create_user_project_id(self):
++        # Return a project
++        self.projects_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.PROJECT),
++            loaded=True,
++        )
++        # Return a user
++        self.users_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.USER),
++            loaded=True,
++        )
++
++        arglist = [
++            '--size', str(volume_fakes.volume_size),
++            '--project', identity_fakes.project_id,
++            '--user', identity_fakes.user_id,
++            volume_fakes.volume_name,
++        ]
++        verifylist = [
++            ('size', volume_fakes.volume_size),
++            ('project', identity_fakes.project_id),
++            ('user', identity_fakes.user_id),
++            ('name', volume_fakes.volume_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        #kwargs = {
++        #    'metadata': volume_fakes.volume_metadata,
++        #}
++        # VolumeManager.create(size, snapshot_id=, source_volid=,
++        #                      display_name=, display_description=,
++        #                      volume_type=, user_id=,
++        #                      project_id=, availability_zone=,
++        #                      metadata=, imageRef=)
++        self.volumes_mock.create.assert_called_with(
++            volume_fakes.volume_size,
++            None,
++            None,
++            volume_fakes.volume_name,
++            #volume_fakes.volume_description,
++            None,
++            None,
++            identity_fakes.user_id,
++            identity_fakes.project_id,
++            None,
++            None,
++            None,
++        )
++
++        collist = (
++            'attach_status',
++            'display_description',
++            'display_name',
++            'id',
++            'properties',
++            'size',
++            'status',
++        )
++        self.assertEqual(columns, collist)
++        datalist = (
++            'detatched',
++            volume_fakes.volume_description,
++            volume_fakes.volume_name,
++            volume_fakes.volume_id,
++            '',
++            volume_fakes.volume_size,
++            '',
++        )
++        self.assertEqual(data, datalist)
++
++    def test_volume_create_user_project_name(self):
++        # Return a project
++        self.projects_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.PROJECT),
++            loaded=True,
++        )
++        # Return a user
++        self.users_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.USER),
++            loaded=True,
++        )
++
++        arglist = [
++            '--size', str(volume_fakes.volume_size),
++            '--project', identity_fakes.project_name,
++            '--user', identity_fakes.user_name,
++            volume_fakes.volume_name,
++        ]
++        verifylist = [
++            ('size', volume_fakes.volume_size),
++            ('project', identity_fakes.project_name),
++            ('user', identity_fakes.user_name),
++            ('name', volume_fakes.volume_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        #kwargs = {
++        #    'metadata': volume_fakes.volume_metadata,
++        #}
++        # VolumeManager.create(size, snapshot_id=, source_volid=,
++        #                      display_name=, display_description=,
++        #                      volume_type=, user_id=,
++        #                      project_id=, availability_zone=,
++        #                      metadata=, imageRef=)
++        self.volumes_mock.create.assert_called_with(
++            volume_fakes.volume_size,
++            None,
++            None,
++            volume_fakes.volume_name,
++            #volume_fakes.volume_description,
++            None,
++            None,
++            identity_fakes.user_id,
++            identity_fakes.project_id,
++            None,
++            None,
++            None,
++        )
++
++        collist = (
++            'attach_status',
++            'display_description',
++            'display_name',
++            'id',
++            'properties',
++            'size',
++            'status',
++        )
++        self.assertEqual(columns, collist)
++        datalist = (
++            'detatched',
++            volume_fakes.volume_description,
++            volume_fakes.volume_name,
++            volume_fakes.volume_id,
++            '',
++            volume_fakes.volume_size,
++            '',
++        )
++        self.assertEqual(data, datalist)
+diff --git a/openstackclient/volume/v1/volume.py b/openstackclient/volume/v1/volume.py
+index c6690fd..0253bc1 100644
+--- a/openstackclient/volume/v1/volume.py
++++ b/openstackclient/volume/v1/volume.py
+@@ -61,14 +61,14 @@ class CreateVolume(show.ShowOne):
+             help='Type of volume',
+         )
+         parser.add_argument(
+-            '--user-id',
+-            metavar='<user-id>',
+-            help='Override user id derived from context (admin only)',
++            '--user',
++            metavar='<user>',
++            help='Specify a different user (admin only)',
+         )
+         parser.add_argument(
+-            '--project-id',
+-            metavar='<project-id>',
+-            help='Override project id derived from context (admin only)',
++            '--project',
++            metavar='<project>',
++            help='Specify a diffeent project (admin only)',
+         )
+         parser.add_argument(
+             '--availability-zone',
+@@ -98,6 +98,7 @@ class CreateVolume(show.ShowOne):
+     def take_action(self, parsed_args):
+         self.log.debug('take_action(%s)' % parsed_args)
+ 
++        identity_client = self.app.client_manager.identity
+         volume_client = self.app.client_manager.volume
+ 
+         source_volume = None
+@@ -107,6 +108,16 @@ class CreateVolume(show.ShowOne):
+                 parsed_args.source,
+             ).id
+ 
++        project = None
++        if parsed_args.project:
++            project = utils.find_resource(
++                identity_client.tenants, parsed_args.project).id
++
++        user = None
++        if parsed_args.user:
++            user = utils.find_resource(
++                identity_client.users, parsed_args.user).id
++
+         volume = volume_client.volumes.create(
+             parsed_args.size,
+             parsed_args.snapshot_id,
+@@ -114,8 +125,8 @@ class CreateVolume(show.ShowOne):
+             parsed_args.name,
+             parsed_args.description,
+             parsed_args.volume_type,
+-            parsed_args.user_id,
+-            parsed_args.project_id,
++            user,
++            project,
+             parsed_args.availability_zone,
+             parsed_args.property,
+             parsed_args.image

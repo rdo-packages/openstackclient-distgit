@@ -1,0 +1,34 @@
+From 574fb361ce2b0d322e6932838c4b9fe7e9ef9a06 Mon Sep 17 00:00:00 2001
+From: OpenStack Jenkins <jenkins@openstack.org>
+Date: Tue, 5 Nov 2013 09:54:51 +0000
+Subject: [PATCH] Updated from global requirements
+
+Change-Id: I421ab7a5b0c0224122cc747141956bc1282f2b07
+---
+ requirements.txt      | 4 ++--
+ test-requirements.txt | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/requirements.txt b/requirements.txt
+index d906f1b..e515041 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -3,6 +3,6 @@ cliff>=1.4.3
+ keyring>=1.6.1,<2.0
+ pycrypto>=2.6
+ python-glanceclient>=0.9.0
+-python-keystoneclient>=0.3.2
++python-keystoneclient>=0.4.1
+ python-novaclient>=2.15.0
+-python-cinderclient>=1.0.5
++python-cinderclient>=1.0.6
+diff --git a/test-requirements.txt b/test-requirements.txt
+index 77788e6..b2bed22 100644
+--- a/test-requirements.txt
++++ b/test-requirements.txt
+@@ -1,4 +1,4 @@
+-hacking>=0.5.6,<0.8
++hacking>=0.8.0,<0.9
+ 
+ coverage>=3.6
+ discover

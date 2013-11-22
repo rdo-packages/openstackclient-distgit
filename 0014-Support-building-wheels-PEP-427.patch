@@ -1,0 +1,28 @@
+From e9161bd85bb9a0630f81f4e9aef1d3d7798b734f Mon Sep 17 00:00:00 2001
+From: Sascha Peilicke <speilicke@suse.com>
+Date: Tue, 19 Nov 2013 10:10:54 +0100
+Subject: [PATCH] Support building wheels (PEP-427)
+
+With that, building and uploading wheels to PyPI is only one "python
+setup.py bdist_wheel" away.
+
+Change-Id: I8c8565f55e7a3434e1a1972a797a6cd7dba8a581
+---
+ setup.cfg | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/setup.cfg b/setup.cfg
+index 2ee47c0..1f84c1e 100644
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -280,8 +280,5 @@ all_files = 1
+ [upload_sphinx]
+ upload-dir = doc/build/html
+ 
+-[egg_info]
+-tag_build = 
+-tag_date = 0
+-tag_svn_revision = 0
+-
++[wheel]
++universal = 1

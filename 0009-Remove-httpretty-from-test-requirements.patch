@@ -1,0 +1,24 @@
+From c004537c9f86a24309764eb914c82f6d4adef6f9 Mon Sep 17 00:00:00 2001
+From: Dean Troyer <dtroyer@gmail.com>
+Date: Thu, 7 Nov 2013 20:56:03 -0600
+Subject: [PATCH] Remove httpretty from test requirements
+
+We don't use it...
+
+Change-Id: I41466da5153a8bdd0e4b4dd5774a9711bff3b7f5
+---
+ test-requirements.txt | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/test-requirements.txt b/test-requirements.txt
+index b2bed22..63de8be 100644
+--- a/test-requirements.txt
++++ b/test-requirements.txt
+@@ -3,7 +3,6 @@ hacking>=0.8.0,<0.9
+ coverage>=3.6
+ discover
+ fixtures>=0.3.14
+-httpretty>=0.6.3
+ mock>=1.0
+ mox3>=0.7.0
+ sphinx>=1.1.2

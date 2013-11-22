@@ -1,0 +1,3199 @@
+From 46363c50999bfe6fdfafe4048451f36f0f03c4f0 Mon Sep 17 00:00:00 2001
+From: Dean Troyer <dtroyer@gmail.com>
+Date: Fri, 15 Nov 2013 17:40:09 -0600
+Subject: [PATCH] Complete basic test infrastructure
+
+This finally gets all of the API tests into a common framework regarding
+test classes and so forth.
+
+Change-Id: If675347129c50dcba0bfc5b6c58f5a2ca57ff46c
+---
+ openstackclient/image/v1/image.py                  |   2 +-
+ openstackclient/tests/compute/test_compute.py      |  50 ---
+ openstackclient/tests/compute/v2/__init__.py       |  14 +
+ openstackclient/tests/compute/v2/fakes.py          |  55 +++
+ openstackclient/tests/compute/v2/test_server.py    |  63 ++++
+ openstackclient/tests/fakes.py                     |   4 +
+ openstackclient/tests/identity/v2_0/fakes.py       |  12 +
+ .../tests/identity/v2_0/test_identity.py           |  31 --
+ .../tests/identity/v2_0/test_project.py            |   3 +-
+ openstackclient/tests/identity/v2_0/test_role.py   |   3 +-
+ .../tests/identity/v2_0/test_service.py            |   3 +-
+ openstackclient/tests/identity/v2_0/test_user.py   |   3 +-
+ openstackclient/tests/identity/v3/fakes.py         |  11 +
+ openstackclient/tests/identity/v3/test_identity.py |  31 --
+ openstackclient/tests/identity/v3/test_project.py  |   3 +-
+ openstackclient/tests/identity/v3/test_role.py     |   3 +-
+ openstackclient/tests/identity/v3/test_service.py  |   3 +-
+ openstackclient/tests/identity/v3/test_user.py     |   3 +-
+ openstackclient/tests/image/test_image.py          |  51 ---
+ openstackclient/tests/image/v1/__init__.py         |  14 +
+ openstackclient/tests/image/v1/fakes.py            |  46 +++
+ openstackclient/tests/image/v1/test_image.py       |  63 ++++
+ openstackclient/tests/image/v2/__init__.py         |  14 +
+ openstackclient/tests/image/v2/fakes.py            |  46 +++
+ openstackclient/tests/image/v2/test_image.py       |  63 ++++
+ openstackclient/tests/object/fakes.py              |  67 ----
+ openstackclient/tests/object/test_container.py     | 361 ------------------
+ openstackclient/tests/object/test_object.py        | 413 ---------------------
+ openstackclient/tests/object/v1/fakes.py           |  67 ++++
+ openstackclient/tests/object/v1/test_container.py  | 361 ++++++++++++++++++
+ openstackclient/tests/object/v1/test_object.py     | 413 +++++++++++++++++++++
+ openstackclient/tests/volume/v1/fakes.py           |  18 +
+ openstackclient/tests/volume/v1/test_volume.py     | 257 ++++++++++++-
+ openstackclient/tests/volume/v1/test_volumecmd.py  | 269 --------------
+ 34 files changed, 1517 insertions(+), 1303 deletions(-)
+ delete mode 100644 openstackclient/tests/compute/test_compute.py
+ create mode 100644 openstackclient/tests/compute/v2/__init__.py
+ create mode 100644 openstackclient/tests/compute/v2/fakes.py
+ create mode 100644 openstackclient/tests/compute/v2/test_server.py
+ delete mode 100644 openstackclient/tests/identity/v2_0/test_identity.py
+ delete mode 100644 openstackclient/tests/identity/v3/test_identity.py
+ delete mode 100644 openstackclient/tests/image/test_image.py
+ create mode 100644 openstackclient/tests/image/v1/__init__.py
+ create mode 100644 openstackclient/tests/image/v1/fakes.py
+ create mode 100644 openstackclient/tests/image/v1/test_image.py
+ create mode 100644 openstackclient/tests/image/v2/__init__.py
+ create mode 100644 openstackclient/tests/image/v2/fakes.py
+ create mode 100644 openstackclient/tests/image/v2/test_image.py
+ delete mode 100644 openstackclient/tests/object/fakes.py
+ delete mode 100644 openstackclient/tests/object/test_container.py
+ delete mode 100644 openstackclient/tests/object/test_object.py
+ create mode 100644 openstackclient/tests/object/v1/fakes.py
+ create mode 100644 openstackclient/tests/object/v1/test_container.py
+ create mode 100644 openstackclient/tests/object/v1/test_object.py
+ delete mode 100644 openstackclient/tests/volume/v1/test_volumecmd.py
+
+diff --git a/openstackclient/image/v1/image.py b/openstackclient/image/v1/image.py
+index 8827d07..40f9fce 100644
+--- a/openstackclient/image/v1/image.py
++++ b/openstackclient/image/v1/image.py
+@@ -213,7 +213,7 @@ class DeleteImage(command.Command):
+             image_client.images,
+             parsed_args.image,
+         )
+-        image_client.images.delete(image)
++        image_client.images.delete(image.id)
+ 
+ 
+ class ListImage(lister.Lister):
+diff --git a/openstackclient/tests/compute/test_compute.py b/openstackclient/tests/compute/test_compute.py
+deleted file mode 100644
+index 9d2061d..0000000
+--- a/openstackclient/tests/compute/test_compute.py
++++ /dev/null
+@@ -1,50 +0,0 @@
+-#   Copyright 2013 OpenStack, LLC.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-import mock
+-
+-from openstackclient.common import clientmanager
+-from openstackclient.compute import client as compute_client
+-from openstackclient.tests import utils
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class FakeClient(object):
+-    def __init__(self, endpoint=None, **kwargs):
+-        self.client = mock.MagicMock()
+-        self.client.auth_url = AUTH_URL
+-
+-
+-class TestCompute(utils.TestCase):
+-    def setUp(self):
+-        super(TestCompute, self).setUp()
+-
+-        api_version = {"compute": "2"}
+-
+-        compute_client.API_VERSIONS = {
+-            "2": "openstackclient.tests.compute.test_compute.FakeClient"
+-        }
+-
+-        self.cm = clientmanager.ClientManager(token=AUTH_TOKEN,
+-                                              url=AUTH_URL,
+-                                              auth_url=AUTH_URL,
+-                                              api_version=api_version)
+-
+-    def test_make_client(self):
+-        self.assertEqual(self.cm.compute.client.auth_token, AUTH_TOKEN)
+-        self.assertEqual(self.cm.compute.client.auth_url, AUTH_URL)
+diff --git a/openstackclient/tests/compute/v2/__init__.py b/openstackclient/tests/compute/v2/__init__.py
+new file mode 100644
+index 0000000..c534c01
+--- /dev/null
++++ b/openstackclient/tests/compute/v2/__init__.py
+@@ -0,0 +1,14 @@
++#   Copyright 2013 OpenStack Foundation
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
+diff --git a/openstackclient/tests/compute/v2/fakes.py b/openstackclient/tests/compute/v2/fakes.py
+new file mode 100644
+index 0000000..8154449
+--- /dev/null
++++ b/openstackclient/tests/compute/v2/fakes.py
+@@ -0,0 +1,55 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import mock
++
++from openstackclient.tests import fakes
++from openstackclient.tests import utils
++
++
++image_id = 'im1'
++
++IMAGE = {
++    'id': image_id,
++}
++
++
++server_id = 'serv1'
++server_name = 'waiter'
++
++SERVER = {
++    'id': server_id,
++    'name': server_name,
++}
++
++
++class FakeComputev2Client(object):
++    def __init__(self, **kwargs):
++        self.images = mock.Mock()
++        self.images.resource_class = fakes.FakeResource(None, {})
++        self.servers = mock.Mock()
++        self.servers.resource_class = fakes.FakeResource(None, {})
++        self.auth_token = kwargs['token']
++        self.management_url = kwargs['endpoint']
++
++
++class TestComputev2(utils.TestCommand):
++    def setUp(self):
++        super(TestComputev2, self).setUp()
++
++        self.app.client_manager.compute = FakeComputev2Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/compute/v2/test_server.py b/openstackclient/tests/compute/v2/test_server.py
+new file mode 100644
+index 0000000..7e68808
+--- /dev/null
++++ b/openstackclient/tests/compute/v2/test_server.py
+@@ -0,0 +1,63 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import copy
++
++from openstackclient.compute.v2 import server
++from openstackclient.tests.compute.v2 import fakes as compute_fakes
++from openstackclient.tests import fakes
++
++
++class TestServer(compute_fakes.TestComputev2):
++
++    def setUp(self):
++        super(TestServer, self).setUp()
++
++        # Get a shortcut to the ServerManager Mock
++        self.servers_mock = self.app.client_manager.compute.servers
++        self.servers_mock.reset_mock()
++
++
++class TestServerDelete(TestServer):
++
++    def setUp(self):
++        super(TestServerDelete, self).setUp()
++
++        # This is the return value for utils.find_resource()
++        self.servers_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(compute_fakes.SERVER),
++            loaded=True,
++        )
++        self.servers_mock.delete.return_value = None
++
++        # Get the command object to test
++        self.cmd = server.DeleteServer(self.app, None)
++
++    def test_server_delete_no_options(self):
++        arglist = [
++            compute_fakes.server_id,
++        ]
++        verifylist = [
++            ('server', compute_fakes.server_id),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        self.cmd.take_action(parsed_args)
++
++        self.servers_mock.delete.assert_called_with(
++            compute_fakes.server_id,
++        )
+diff --git a/openstackclient/tests/fakes.py b/openstackclient/tests/fakes.py
+index d6cf1d7..8ab4546 100644
+--- a/openstackclient/tests/fakes.py
++++ b/openstackclient/tests/fakes.py
+@@ -16,6 +16,10 @@
+ import sys
+ 
+ 
++AUTH_TOKEN = "foobar"
++AUTH_URL = "http://0.0.0.0"
++
++
+ class FakeStdout:
+     def __init__(self):
+         self.content = []
+diff --git a/openstackclient/tests/identity/v2_0/fakes.py b/openstackclient/tests/identity/v2_0/fakes.py
+index b1aeabd..80febd2 100644
+--- a/openstackclient/tests/identity/v2_0/fakes.py
++++ b/openstackclient/tests/identity/v2_0/fakes.py
+@@ -16,6 +16,8 @@
+ import mock
+ 
+ from openstackclient.tests import fakes
++from openstackclient.tests import utils
++
+ 
+ project_id = '8-9-64'
+ project_name = 'beatles'
+@@ -83,3 +85,13 @@ class FakeIdentityv2Client(object):
+         self.ec2.resource_class = fakes.FakeResource(None, {})
+         self.auth_token = kwargs['token']
+         self.management_url = kwargs['endpoint']
++
++
++class TestIdentityv2(utils.TestCommand):
++    def setUp(self):
++        super(TestIdentityv2, self).setUp()
++
++        self.app.client_manager.identity = FakeIdentityv2Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/identity/v2_0/test_identity.py b/openstackclient/tests/identity/v2_0/test_identity.py
+deleted file mode 100644
+index 8a50a48..0000000
+--- a/openstackclient/tests/identity/v2_0/test_identity.py
++++ /dev/null
+@@ -1,31 +0,0 @@
+-#   Copyright 2013 Nebula Inc.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-from openstackclient.tests.identity.v2_0 import fakes
+-from openstackclient.tests import utils
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class TestIdentityv2(utils.TestCommand):
+-    def setUp(self):
+-        super(TestIdentityv2, self).setUp()
+-
+-        self.app.client_manager.identity = fakes.FakeIdentityv2Client(
+-            endpoint=AUTH_URL,
+-            token=AUTH_TOKEN,
+-        )
+diff --git a/openstackclient/tests/identity/v2_0/test_project.py b/openstackclient/tests/identity/v2_0/test_project.py
+index 933bd09..30f4278 100644
+--- a/openstackclient/tests/identity/v2_0/test_project.py
++++ b/openstackclient/tests/identity/v2_0/test_project.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v2_0 import project
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
+-from openstackclient.tests.identity.v2_0 import test_identity
+ 
+ 
+-class TestProject(test_identity.TestIdentityv2):
++class TestProject(identity_fakes.TestIdentityv2):
+ 
+     def setUp(self):
+         super(TestProject, self).setUp()
+diff --git a/openstackclient/tests/identity/v2_0/test_role.py b/openstackclient/tests/identity/v2_0/test_role.py
+index 56e9d4c..d515bd7 100644
+--- a/openstackclient/tests/identity/v2_0/test_role.py
++++ b/openstackclient/tests/identity/v2_0/test_role.py
+@@ -20,10 +20,9 @@ from openstackclient.common import exceptions
+ from openstackclient.identity.v2_0 import role
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
+-from openstackclient.tests.identity.v2_0 import test_identity
+ 
+ 
+-class TestRole(test_identity.TestIdentityv2):
++class TestRole(identity_fakes.TestIdentityv2):
+ 
+     def setUp(self):
+         super(TestRole, self).setUp()
+diff --git a/openstackclient/tests/identity/v2_0/test_service.py b/openstackclient/tests/identity/v2_0/test_service.py
+index f09c413..6c93574 100644
+--- a/openstackclient/tests/identity/v2_0/test_service.py
++++ b/openstackclient/tests/identity/v2_0/test_service.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v2_0 import service
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
+-from openstackclient.tests.identity.v2_0 import test_identity
+ 
+ 
+-class TestService(test_identity.TestIdentityv2):
++class TestService(identity_fakes.TestIdentityv2):
+ 
+     def setUp(self):
+         super(TestService, self).setUp()
+diff --git a/openstackclient/tests/identity/v2_0/test_user.py b/openstackclient/tests/identity/v2_0/test_user.py
+index 2fe585e..a18d13d 100644
+--- a/openstackclient/tests/identity/v2_0/test_user.py
++++ b/openstackclient/tests/identity/v2_0/test_user.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v2_0 import user
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
+-from openstackclient.tests.identity.v2_0 import test_identity
+ 
+ 
+-class TestUser(test_identity.TestIdentityv2):
++class TestUser(identity_fakes.TestIdentityv2):
+ 
+     def setUp(self):
+         super(TestUser, self).setUp()
+diff --git a/openstackclient/tests/identity/v3/fakes.py b/openstackclient/tests/identity/v3/fakes.py
+index 1338553..9d40d9d 100644
+--- a/openstackclient/tests/identity/v3/fakes.py
++++ b/openstackclient/tests/identity/v3/fakes.py
+@@ -16,6 +16,7 @@
+ import mock
+ 
+ from openstackclient.tests import fakes
++from openstackclient.tests import utils
+ 
+ 
+ domain_id = 'd1'
+@@ -104,3 +105,13 @@ class FakeIdentityv3Client(object):
+         self.users.resource_class = fakes.FakeResource(None, {})
+         self.auth_token = kwargs['token']
+         self.management_url = kwargs['endpoint']
++
++
++class TestIdentityv3(utils.TestCommand):
++    def setUp(self):
++        super(TestIdentityv3, self).setUp()
++
++        self.app.client_manager.identity = FakeIdentityv3Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/identity/v3/test_identity.py b/openstackclient/tests/identity/v3/test_identity.py
+deleted file mode 100644
+index 4b55ee4..0000000
+--- a/openstackclient/tests/identity/v3/test_identity.py
++++ /dev/null
+@@ -1,31 +0,0 @@
+-#   Copyright 2013 Nebula Inc.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-from openstackclient.tests.identity.v3 import fakes
+-from openstackclient.tests import utils
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class TestIdentityv3(utils.TestCommand):
+-    def setUp(self):
+-        super(TestIdentityv3, self).setUp()
+-
+-        self.app.client_manager.identity = fakes.FakeIdentityv3Client(
+-            endpoint=AUTH_URL,
+-            token=AUTH_TOKEN,
+-        )
+diff --git a/openstackclient/tests/identity/v3/test_project.py b/openstackclient/tests/identity/v3/test_project.py
+index 91c15e2..02cb41b 100644
+--- a/openstackclient/tests/identity/v3/test_project.py
++++ b/openstackclient/tests/identity/v3/test_project.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v3 import project
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v3 import fakes as identity_fakes
+-from openstackclient.tests.identity.v3 import test_identity
+ 
+ 
+-class TestProject(test_identity.TestIdentityv3):
++class TestProject(identity_fakes.TestIdentityv3):
+ 
+     def setUp(self):
+         super(TestProject, self).setUp()
+diff --git a/openstackclient/tests/identity/v3/test_role.py b/openstackclient/tests/identity/v3/test_role.py
+index ef2b3e0..040c39d 100644
+--- a/openstackclient/tests/identity/v3/test_role.py
++++ b/openstackclient/tests/identity/v3/test_role.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v3 import role
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v3 import fakes as identity_fakes
+-from openstackclient.tests.identity.v3 import test_identity
+ 
+ 
+-class TestRole(test_identity.TestIdentityv3):
++class TestRole(identity_fakes.TestIdentityv3):
+ 
+     def setUp(self):
+         super(TestRole, self).setUp()
+diff --git a/openstackclient/tests/identity/v3/test_service.py b/openstackclient/tests/identity/v3/test_service.py
+index 1c3ae21..10d249c 100644
+--- a/openstackclient/tests/identity/v3/test_service.py
++++ b/openstackclient/tests/identity/v3/test_service.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v3 import service
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v3 import fakes as identity_fakes
+-from openstackclient.tests.identity.v3 import test_identity
+ 
+ 
+-class TestService(test_identity.TestIdentityv3):
++class TestService(identity_fakes.TestIdentityv3):
+ 
+     def setUp(self):
+         super(TestService, self).setUp()
+diff --git a/openstackclient/tests/identity/v3/test_user.py b/openstackclient/tests/identity/v3/test_user.py
+index 8f19580..4321b04 100644
+--- a/openstackclient/tests/identity/v3/test_user.py
++++ b/openstackclient/tests/identity/v3/test_user.py
+@@ -18,10 +18,9 @@ import copy
+ from openstackclient.identity.v3 import user
+ from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v3 import fakes as identity_fakes
+-from openstackclient.tests.identity.v3 import test_identity
+ 
+ 
+-class TestUser(test_identity.TestIdentityv3):
++class TestUser(identity_fakes.TestIdentityv3):
+ 
+     def setUp(self):
+         super(TestUser, self).setUp()
+diff --git a/openstackclient/tests/image/test_image.py b/openstackclient/tests/image/test_image.py
+deleted file mode 100644
+index f4c8d72..0000000
+--- a/openstackclient/tests/image/test_image.py
++++ /dev/null
+@@ -1,51 +0,0 @@
+-#   Copyright 2013 OpenStack, LLC.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-import mock
+-
+-from openstackclient.common import clientmanager
+-from openstackclient.image import client as image_client
+-from openstackclient.tests import utils
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class FakeClient(object):
+-    def __init__(self, endpoint=None, **kwargs):
+-        self.client = mock.MagicMock()
+-        self.client.auth_token = AUTH_TOKEN
+-        self.client.auth_url = AUTH_URL
+-
+-
+-class TestImage(utils.TestCase):
+-    def setUp(self):
+-        super(TestImage, self).setUp()
+-
+-        api_version = {"image": "2"}
+-
+-        image_client.API_VERSIONS = {
+-            "2": "openstackclient.tests.image.test_image.FakeClient"
+-        }
+-
+-        self.cm = clientmanager.ClientManager(token=AUTH_TOKEN,
+-                                              url=AUTH_URL,
+-                                              auth_url=AUTH_URL,
+-                                              api_version=api_version)
+-
+-    def test_make_client(self):
+-        self.assertEqual(self.cm.image.client.auth_token, AUTH_TOKEN)
+-        self.assertEqual(self.cm.image.client.auth_url, AUTH_URL)
+diff --git a/openstackclient/tests/image/v1/__init__.py b/openstackclient/tests/image/v1/__init__.py
+new file mode 100644
+index 0000000..ebf59b3
+--- /dev/null
++++ b/openstackclient/tests/image/v1/__init__.py
+@@ -0,0 +1,14 @@
++#   Copyright 2013 OpenStack, LLC.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
+diff --git a/openstackclient/tests/image/v1/fakes.py b/openstackclient/tests/image/v1/fakes.py
+new file mode 100644
+index 0000000..ea2af84
+--- /dev/null
++++ b/openstackclient/tests/image/v1/fakes.py
+@@ -0,0 +1,46 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import mock
++
++from openstackclient.tests import fakes
++from openstackclient.tests import utils
++
++
++image_id = 'im1'
++image_name = 'graven'
++
++IMAGE = {
++    'id': image_id,
++    'name': image_name
++}
++
++
++class FakeImagev1Client(object):
++    def __init__(self, **kwargs):
++        self.images = mock.Mock()
++        self.images.resource_class = fakes.FakeResource(None, {})
++        self.auth_token = kwargs['token']
++        self.management_url = kwargs['endpoint']
++
++
++class TestImagev1(utils.TestCommand):
++    def setUp(self):
++        super(TestImagev1, self).setUp()
++
++        self.app.client_manager.image = FakeImagev1Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/image/v1/test_image.py b/openstackclient/tests/image/v1/test_image.py
+new file mode 100644
+index 0000000..a410674
+--- /dev/null
++++ b/openstackclient/tests/image/v1/test_image.py
+@@ -0,0 +1,63 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import copy
++
++from openstackclient.image.v1 import image
++from openstackclient.tests import fakes
++from openstackclient.tests.image.v1 import fakes as image_fakes
++
++
++class TestImage(image_fakes.TestImagev1):
++
++    def setUp(self):
++        super(TestImage, self).setUp()
++
++        # Get a shortcut to the ServerManager Mock
++        self.images_mock = self.app.client_manager.image.images
++        self.images_mock.reset_mock()
++
++
++class TestImageDelete(TestImage):
++
++    def setUp(self):
++        super(TestImageDelete, self).setUp()
++
++        # This is the return value for utils.find_resource()
++        self.images_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(image_fakes.IMAGE),
++            loaded=True,
++        )
++        self.images_mock.delete.return_value = None
++
++        # Get the command object to test
++        self.cmd = image.DeleteImage(self.app, None)
++
++    def test_image_delete_no_options(self):
++        arglist = [
++            image_fakes.image_id,
++        ]
++        verifylist = [
++            ('image', image_fakes.image_id),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        self.cmd.take_action(parsed_args)
++
++        self.images_mock.delete.assert_called_with(
++            image_fakes.image_id,
++        )
+diff --git a/openstackclient/tests/image/v2/__init__.py b/openstackclient/tests/image/v2/__init__.py
+new file mode 100644
+index 0000000..ebf59b3
+--- /dev/null
++++ b/openstackclient/tests/image/v2/__init__.py
+@@ -0,0 +1,14 @@
++#   Copyright 2013 OpenStack, LLC.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
+diff --git a/openstackclient/tests/image/v2/fakes.py b/openstackclient/tests/image/v2/fakes.py
+new file mode 100644
+index 0000000..df6b807
+--- /dev/null
++++ b/openstackclient/tests/image/v2/fakes.py
+@@ -0,0 +1,46 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import mock
++
++from openstackclient.tests import fakes
++from openstackclient.tests import utils
++
++
++image_id = 'im1'
++image_name = 'graven'
++
++IMAGE = {
++    'id': image_id,
++    'name': image_name
++}
++
++
++class FakeImagev2Client(object):
++    def __init__(self, **kwargs):
++        self.images = mock.Mock()
++        self.images.resource_class = fakes.FakeResource(None, {})
++        self.auth_token = kwargs['token']
++        self.management_url = kwargs['endpoint']
++
++
++class TestImagev2(utils.TestCommand):
++    def setUp(self):
++        super(TestImagev2, self).setUp()
++
++        self.app.client_manager.image = FakeImagev2Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/image/v2/test_image.py b/openstackclient/tests/image/v2/test_image.py
+new file mode 100644
+index 0000000..ef84e2c
+--- /dev/null
++++ b/openstackclient/tests/image/v2/test_image.py
+@@ -0,0 +1,63 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import copy
++
++from openstackclient.image.v1 import image
++from openstackclient.tests import fakes
++from openstackclient.tests.image.v2 import fakes as image_fakes
++
++
++class TestImage(image_fakes.TestImagev2):
++
++    def setUp(self):
++        super(TestImage, self).setUp()
++
++        # Get a shortcut to the ServerManager Mock
++        self.images_mock = self.app.client_manager.image.images
++        self.images_mock.reset_mock()
++
++
++class TestImageDelete(TestImage):
++
++    def setUp(self):
++        super(TestImageDelete, self).setUp()
++
++        # This is the return value for utils.find_resource()
++        self.images_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(image_fakes.IMAGE),
++            loaded=True,
++        )
++        self.images_mock.delete.return_value = None
++
++        # Get the command object to test
++        self.cmd = image.DeleteImage(self.app, None)
++
++    def test_image_delete_no_options(self):
++        arglist = [
++            image_fakes.image_id,
++        ]
++        verifylist = [
++            ('image', image_fakes.image_id),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        self.cmd.take_action(parsed_args)
++
++        self.images_mock.delete.assert_called_with(
++            image_fakes.image_id,
++        )
+diff --git a/openstackclient/tests/object/fakes.py b/openstackclient/tests/object/fakes.py
+deleted file mode 100644
+index fbc784a..0000000
+--- a/openstackclient/tests/object/fakes.py
++++ /dev/null
+@@ -1,67 +0,0 @@
+-#   Copyright 2013 Nebula Inc.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-container_name = 'bit-bucket'
+-container_bytes = 1024
+-container_count = 1
+-
+-container_name_2 = 'archive'
+-container_name_3 = 'bit-blit'
+-
+-CONTAINER = {
+-    'name': container_name,
+-    'bytes': container_bytes,
+-    'count': container_count,
+-}
+-
+-CONTAINER_2 = {
+-    'name': container_name_2,
+-    'bytes': container_bytes * 2,
+-    'count': container_count * 2,
+-}
+-
+-CONTAINER_3 = {
+-    'name': container_name_3,
+-    'bytes': container_bytes * 3,
+-    'count': container_count * 3,
+-}
+-
+-object_name_1 = 'punch-card'
+-object_bytes_1 = 80
+-object_hash_1 = '1234567890'
+-object_content_type_1 = 'text'
+-object_modified_1 = 'today'
+-
+-object_name_2 = 'floppy-disk'
+-object_bytes_2 = 1440000
+-object_hash_2 = '0987654321'
+-object_content_type_2 = 'text'
+-object_modified_2 = 'today'
+-
+-OBJECT = {
+-    'name': object_name_1,
+-    'bytes': object_bytes_1,
+-    'hash': object_hash_1,
+-    'content_type': object_content_type_1,
+-    'last_modified': object_modified_1,
+-}
+-
+-OBJECT_2 = {
+-    'name': object_name_2,
+-    'bytes': object_bytes_2,
+-    'hash': object_hash_2,
+-    'content_type': object_content_type_2,
+-    'last_modified': object_modified_2,
+-}
+diff --git a/openstackclient/tests/object/test_container.py b/openstackclient/tests/object/test_container.py
+deleted file mode 100644
+index 24d6763..0000000
+--- a/openstackclient/tests/object/test_container.py
++++ /dev/null
+@@ -1,361 +0,0 @@
+-#   Copyright 2013 OpenStack Foundation
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-import copy
+-import mock
+-
+-from openstackclient.common import clientmanager
+-from openstackclient.object.v1 import container
+-from openstackclient.tests.object import fakes as object_fakes
+-from openstackclient.tests import utils
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class FakeClient(object):
+-    def __init__(self, endpoint=None, **kwargs):
+-        self.endpoint = AUTH_URL
+-        self.token = AUTH_TOKEN
+-
+-
+-class TestObject(utils.TestCommand):
+-    def setUp(self):
+-        super(TestObject, self).setUp()
+-
+-        api_version = {"object-store": "1"}
+-        self.app.client_manager = clientmanager.ClientManager(
+-            token=AUTH_TOKEN,
+-            url=AUTH_URL,
+-            auth_url=AUTH_URL,
+-            api_version=api_version,
+-        )
+-
+-
+-class TestObjectClient(TestObject):
+-
+-    def test_make_client(self):
+-        self.assertEqual(self.app.client_manager.object.endpoint, AUTH_URL)
+-        self.assertEqual(self.app.client_manager.object.token, AUTH_TOKEN)
+-
+-
+-@mock.patch(
+-    'openstackclient.object.v1.container.lib_container.list_containers'
+-)
+-class TestContainerList(TestObject):
+-
+-    def setUp(self):
+-        super(TestContainerList, self).setUp()
+-
+-        # Get the command object to test
+-        self.cmd = container.ListContainer(self.app, None)
+-
+-    def test_object_list_containers_no_options(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-            copy.deepcopy(object_fakes.CONTAINER_2),
+-        ]
+-
+-        arglist = []
+-        verifylist = []
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.container_name, ),
+-            (object_fakes.container_name_3, ),
+-            (object_fakes.container_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_containers_prefix(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-        ]
+-
+-        arglist = [
+-            '--prefix', 'bit',
+-        ]
+-        verifylist = [
+-            ('prefix', 'bit'),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'prefix': 'bit',
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.container_name, ),
+-            (object_fakes.container_name_3, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_containers_marker(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-        ]
+-
+-        arglist = [
+-            '--marker', object_fakes.container_name,
+-        ]
+-        verifylist = [
+-            ('marker', object_fakes.container_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'marker': object_fakes.container_name,
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.container_name, ),
+-            (object_fakes.container_name_3, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_containers_end_marker(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-        ]
+-
+-        arglist = [
+-            '--end-marker', object_fakes.container_name_3,
+-        ]
+-        verifylist = [
+-            ('end_marker', object_fakes.container_name_3),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'end_marker': object_fakes.container_name_3,
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.container_name, ),
+-            (object_fakes.container_name_3, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_containers_limit(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-        ]
+-
+-        arglist = [
+-            '--limit', '2',
+-        ]
+-        verifylist = [
+-            ('limit', 2),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'limit': 2,
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.container_name, ),
+-            (object_fakes.container_name_3, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_containers_long(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-        ]
+-
+-        arglist = [
+-            '--long',
+-        ]
+-        verifylist = [
+-            ('long', True),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name', 'Bytes', 'Count')
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (
+-                object_fakes.container_name,
+-                object_fakes.container_bytes,
+-                object_fakes.container_count,
+-            ),
+-            (
+-                object_fakes.container_name_3,
+-                object_fakes.container_bytes * 3,
+-                object_fakes.container_count * 3,
+-            ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_containers_all(self, c_mock):
+-        c_mock.return_value = [
+-            copy.deepcopy(object_fakes.CONTAINER),
+-            copy.deepcopy(object_fakes.CONTAINER_2),
+-            copy.deepcopy(object_fakes.CONTAINER_3),
+-        ]
+-
+-        arglist = [
+-            '--all',
+-        ]
+-        verifylist = [
+-            ('all', True),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'full_listing': True,
+-        }
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.container_name, ),
+-            (object_fakes.container_name_2, ),
+-            (object_fakes.container_name_3, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-
+-@mock.patch(
+-    'openstackclient.object.v1.container.lib_container.show_container'
+-)
+-class TestContainerShow(TestObject):
+-
+-    def setUp(self):
+-        super(TestContainerShow, self).setUp()
+-
+-        # Get the command object to test
+-        self.cmd = container.ShowContainer(self.app, None)
+-
+-    def test_container_show(self, c_mock):
+-        c_mock.return_value = copy.deepcopy(object_fakes.CONTAINER)
+-
+-        arglist = [
+-            object_fakes.container_name,
+-        ]
+-        verifylist = [
+-            ('container', object_fakes.container_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-        }
+-        # lib.container.show_container(api, url, container)
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name,
+-            **kwargs
+-        )
+-
+-        collist = ('bytes', 'count', 'name')
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            object_fakes.container_bytes,
+-            object_fakes.container_count,
+-            object_fakes.container_name,
+-        )
+-        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/object/test_object.py b/openstackclient/tests/object/test_object.py
+deleted file mode 100644
+index 1ceb0a5..0000000
+--- a/openstackclient/tests/object/test_object.py
++++ /dev/null
+@@ -1,413 +0,0 @@
+-#   Copyright 2013 OpenStack Foundation
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-import copy
+-import mock
+-
+-from openstackclient.common import clientmanager
+-from openstackclient.object.v1 import object as obj
+-from openstackclient.tests.object import fakes as object_fakes
+-from openstackclient.tests import utils
+-
+-
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
+-
+-
+-class FakeClient(object):
+-    def __init__(self, endpoint=None, **kwargs):
+-        self.endpoint = AUTH_URL
+-        self.token = AUTH_TOKEN
+-
+-
+-class TestObject(utils.TestCommand):
+-    def setUp(self):
+-        super(TestObject, self).setUp()
+-
+-        api_version = {"object-store": "1"}
+-        self.app.client_manager = clientmanager.ClientManager(
+-            token=AUTH_TOKEN,
+-            url=AUTH_URL,
+-            auth_url=AUTH_URL,
+-            api_version=api_version,
+-        )
+-
+-
+-class TestObjectClient(TestObject):
+-
+-    def test_make_client(self):
+-        self.assertEqual(self.app.client_manager.object.endpoint, AUTH_URL)
+-        self.assertEqual(self.app.client_manager.object.token, AUTH_TOKEN)
+-
+-
+-@mock.patch(
+-    'openstackclient.object.v1.object.lib_object.list_objects'
+-)
+-class TestObjectList(TestObject):
+-
+-    def setUp(self):
+-        super(TestObjectList, self).setUp()
+-
+-        # Get the command object to test
+-        self.cmd = obj.ListObject(self.app, None)
+-
+-    def test_object_list_objects_no_options(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT),
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            object_fakes.container_name,
+-        ]
+-        verifylist = [
+-            ('container', object_fakes.container_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name,
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_1, ),
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_prefix(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--prefix', 'floppy',
+-            object_fakes.container_name_2,
+-        ]
+-        verifylist = [
+-            ('prefix', 'floppy'),
+-            ('container', object_fakes.container_name_2),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'prefix': 'floppy',
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name_2,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_delimiter(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--delimiter', '=',
+-            object_fakes.container_name_2,
+-        ]
+-        verifylist = [
+-            ('delimiter', '='),
+-            ('container', object_fakes.container_name_2),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'delimiter': '=',
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name_2,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_marker(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--marker', object_fakes.object_name_2,
+-            object_fakes.container_name_2,
+-        ]
+-        verifylist = [
+-            ('marker', object_fakes.object_name_2),
+-            ('container', object_fakes.container_name_2),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'marker': object_fakes.object_name_2,
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name_2,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_end_marker(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--end-marker', object_fakes.object_name_2,
+-            object_fakes.container_name_2,
+-        ]
+-        verifylist = [
+-            ('end_marker', object_fakes.object_name_2),
+-            ('container', object_fakes.container_name_2),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'end_marker': object_fakes.object_name_2,
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name_2,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_limit(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--limit', '2',
+-            object_fakes.container_name_2,
+-        ]
+-        verifylist = [
+-            ('limit', 2),
+-            ('container', object_fakes.container_name_2),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'limit': 2,
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name_2,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_long(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT),
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--long',
+-            object_fakes.container_name,
+-        ]
+-        verifylist = [
+-            ('long', True),
+-            ('container', object_fakes.container_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name,
+-            **kwargs
+-        )
+-
+-        collist = ('Name', 'Bytes', 'Hash', 'Content Type', 'Last Modified')
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (
+-                object_fakes.object_name_1,
+-                object_fakes.object_bytes_1,
+-                object_fakes.object_hash_1,
+-                object_fakes.object_content_type_1,
+-                object_fakes.object_modified_1,
+-            ),
+-            (
+-                object_fakes.object_name_2,
+-                object_fakes.object_bytes_2,
+-                object_fakes.object_hash_2,
+-                object_fakes.object_content_type_2,
+-                object_fakes.object_modified_2,
+-            ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-    def test_object_list_objects_all(self, o_mock):
+-        o_mock.return_value = [
+-            copy.deepcopy(object_fakes.OBJECT),
+-            copy.deepcopy(object_fakes.OBJECT_2),
+-        ]
+-
+-        arglist = [
+-            '--all',
+-            object_fakes.container_name,
+-        ]
+-        verifylist = [
+-            ('all', True),
+-            ('container', object_fakes.container_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-            'full_listing': True,
+-        }
+-        o_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name,
+-            **kwargs
+-        )
+-
+-        collist = ('Name',)
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            (object_fakes.object_name_1, ),
+-            (object_fakes.object_name_2, ),
+-        )
+-        self.assertEqual(tuple(data), datalist)
+-
+-
+-@mock.patch(
+-    'openstackclient.object.v1.object.lib_object.show_object'
+-)
+-class TestObjectShow(TestObject):
+-
+-    def setUp(self):
+-        super(TestObjectShow, self).setUp()
+-
+-        # Get the command object to test
+-        self.cmd = obj.ShowObject(self.app, None)
+-
+-    def test_object_show(self, c_mock):
+-        c_mock.return_value = copy.deepcopy(object_fakes.OBJECT)
+-
+-        arglist = [
+-            object_fakes.container_name,
+-            object_fakes.object_name_1,
+-        ]
+-        verifylist = [
+-            ('container', object_fakes.container_name),
+-            ('object', object_fakes.object_name_1),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        kwargs = {
+-        }
+-        # lib.container.show_container(api, url, container)
+-        c_mock.assert_called_with(
+-            self.app.restapi,
+-            AUTH_URL,
+-            object_fakes.container_name,
+-            object_fakes.object_name_1,
+-            **kwargs
+-        )
+-
+-        collist = ('bytes', 'content_type', 'hash', 'last_modified', 'name')
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            object_fakes.object_bytes_1,
+-            object_fakes.object_content_type_1,
+-            object_fakes.object_hash_1,
+-            object_fakes.object_modified_1,
+-            object_fakes.object_name_1,
+-        )
+-        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/object/v1/fakes.py b/openstackclient/tests/object/v1/fakes.py
+new file mode 100644
+index 0000000..fbc784a
+--- /dev/null
++++ b/openstackclient/tests/object/v1/fakes.py
+@@ -0,0 +1,67 @@
++#   Copyright 2013 Nebula Inc.
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++container_name = 'bit-bucket'
++container_bytes = 1024
++container_count = 1
++
++container_name_2 = 'archive'
++container_name_3 = 'bit-blit'
++
++CONTAINER = {
++    'name': container_name,
++    'bytes': container_bytes,
++    'count': container_count,
++}
++
++CONTAINER_2 = {
++    'name': container_name_2,
++    'bytes': container_bytes * 2,
++    'count': container_count * 2,
++}
++
++CONTAINER_3 = {
++    'name': container_name_3,
++    'bytes': container_bytes * 3,
++    'count': container_count * 3,
++}
++
++object_name_1 = 'punch-card'
++object_bytes_1 = 80
++object_hash_1 = '1234567890'
++object_content_type_1 = 'text'
++object_modified_1 = 'today'
++
++object_name_2 = 'floppy-disk'
++object_bytes_2 = 1440000
++object_hash_2 = '0987654321'
++object_content_type_2 = 'text'
++object_modified_2 = 'today'
++
++OBJECT = {
++    'name': object_name_1,
++    'bytes': object_bytes_1,
++    'hash': object_hash_1,
++    'content_type': object_content_type_1,
++    'last_modified': object_modified_1,
++}
++
++OBJECT_2 = {
++    'name': object_name_2,
++    'bytes': object_bytes_2,
++    'hash': object_hash_2,
++    'content_type': object_content_type_2,
++    'last_modified': object_modified_2,
++}
+diff --git a/openstackclient/tests/object/v1/test_container.py b/openstackclient/tests/object/v1/test_container.py
+new file mode 100644
+index 0000000..2090b88
+--- /dev/null
++++ b/openstackclient/tests/object/v1/test_container.py
+@@ -0,0 +1,361 @@
++#   Copyright 2013 OpenStack Foundation
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import copy
++import mock
++
++from openstackclient.common import clientmanager
++from openstackclient.object.v1 import container
++from openstackclient.tests.object.v1 import fakes as object_fakes
++from openstackclient.tests import utils
++
++
++AUTH_TOKEN = "foobar"
++AUTH_URL = "http://0.0.0.0"
++
++
++class FakeClient(object):
++    def __init__(self, endpoint=None, **kwargs):
++        self.endpoint = AUTH_URL
++        self.token = AUTH_TOKEN
++
++
++class TestObject(utils.TestCommand):
++    def setUp(self):
++        super(TestObject, self).setUp()
++
++        api_version = {"object-store": "1"}
++        self.app.client_manager = clientmanager.ClientManager(
++            token=AUTH_TOKEN,
++            url=AUTH_URL,
++            auth_url=AUTH_URL,
++            api_version=api_version,
++        )
++
++
++class TestObjectClient(TestObject):
++
++    def test_make_client(self):
++        self.assertEqual(self.app.client_manager.object.endpoint, AUTH_URL)
++        self.assertEqual(self.app.client_manager.object.token, AUTH_TOKEN)
++
++
++@mock.patch(
++    'openstackclient.object.v1.container.lib_container.list_containers'
++)
++class TestContainerList(TestObject):
++
++    def setUp(self):
++        super(TestContainerList, self).setUp()
++
++        # Get the command object to test
++        self.cmd = container.ListContainer(self.app, None)
++
++    def test_object_list_containers_no_options(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++            copy.deepcopy(object_fakes.CONTAINER_2),
++        ]
++
++        arglist = []
++        verifylist = []
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.container_name, ),
++            (object_fakes.container_name_3, ),
++            (object_fakes.container_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_containers_prefix(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++        ]
++
++        arglist = [
++            '--prefix', 'bit',
++        ]
++        verifylist = [
++            ('prefix', 'bit'),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'prefix': 'bit',
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.container_name, ),
++            (object_fakes.container_name_3, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_containers_marker(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++        ]
++
++        arglist = [
++            '--marker', object_fakes.container_name,
++        ]
++        verifylist = [
++            ('marker', object_fakes.container_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'marker': object_fakes.container_name,
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.container_name, ),
++            (object_fakes.container_name_3, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_containers_end_marker(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++        ]
++
++        arglist = [
++            '--end-marker', object_fakes.container_name_3,
++        ]
++        verifylist = [
++            ('end_marker', object_fakes.container_name_3),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'end_marker': object_fakes.container_name_3,
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.container_name, ),
++            (object_fakes.container_name_3, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_containers_limit(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++        ]
++
++        arglist = [
++            '--limit', '2',
++        ]
++        verifylist = [
++            ('limit', 2),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'limit': 2,
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.container_name, ),
++            (object_fakes.container_name_3, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_containers_long(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++        ]
++
++        arglist = [
++            '--long',
++        ]
++        verifylist = [
++            ('long', True),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name', 'Bytes', 'Count')
++        self.assertEqual(columns, collist)
++        datalist = (
++            (
++                object_fakes.container_name,
++                object_fakes.container_bytes,
++                object_fakes.container_count,
++            ),
++            (
++                object_fakes.container_name_3,
++                object_fakes.container_bytes * 3,
++                object_fakes.container_count * 3,
++            ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_containers_all(self, c_mock):
++        c_mock.return_value = [
++            copy.deepcopy(object_fakes.CONTAINER),
++            copy.deepcopy(object_fakes.CONTAINER_2),
++            copy.deepcopy(object_fakes.CONTAINER_3),
++        ]
++
++        arglist = [
++            '--all',
++        ]
++        verifylist = [
++            ('all', True),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'full_listing': True,
++        }
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.container_name, ),
++            (object_fakes.container_name_2, ),
++            (object_fakes.container_name_3, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++
++@mock.patch(
++    'openstackclient.object.v1.container.lib_container.show_container'
++)
++class TestContainerShow(TestObject):
++
++    def setUp(self):
++        super(TestContainerShow, self).setUp()
++
++        # Get the command object to test
++        self.cmd = container.ShowContainer(self.app, None)
++
++    def test_container_show(self, c_mock):
++        c_mock.return_value = copy.deepcopy(object_fakes.CONTAINER)
++
++        arglist = [
++            object_fakes.container_name,
++        ]
++        verifylist = [
++            ('container', object_fakes.container_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        # lib.container.show_container(api, url, container)
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++            **kwargs
++        )
++
++        collist = ('bytes', 'count', 'name')
++        self.assertEqual(columns, collist)
++        datalist = (
++            object_fakes.container_bytes,
++            object_fakes.container_count,
++            object_fakes.container_name,
++        )
++        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/object/v1/test_object.py b/openstackclient/tests/object/v1/test_object.py
+new file mode 100644
+index 0000000..52b5ebd
+--- /dev/null
++++ b/openstackclient/tests/object/v1/test_object.py
+@@ -0,0 +1,413 @@
++#   Copyright 2013 OpenStack Foundation
++#
++#   Licensed under the Apache License, Version 2.0 (the "License"); you may
++#   not use this file except in compliance with the License. You may obtain
++#   a copy of the License at
++#
++#        http://www.apache.org/licenses/LICENSE-2.0
++#
++#   Unless required by applicable law or agreed to in writing, software
++#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
++#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
++#   License for the specific language governing permissions and limitations
++#   under the License.
++#
++
++import copy
++import mock
++
++from openstackclient.common import clientmanager
++from openstackclient.object.v1 import object as obj
++from openstackclient.tests.object.v1 import fakes as object_fakes
++from openstackclient.tests import utils
++
++
++AUTH_TOKEN = "foobar"
++AUTH_URL = "http://0.0.0.0"
++
++
++class FakeClient(object):
++    def __init__(self, endpoint=None, **kwargs):
++        self.endpoint = AUTH_URL
++        self.token = AUTH_TOKEN
++
++
++class TestObject(utils.TestCommand):
++    def setUp(self):
++        super(TestObject, self).setUp()
++
++        api_version = {"object-store": "1"}
++        self.app.client_manager = clientmanager.ClientManager(
++            token=AUTH_TOKEN,
++            url=AUTH_URL,
++            auth_url=AUTH_URL,
++            api_version=api_version,
++        )
++
++
++class TestObjectClient(TestObject):
++
++    def test_make_client(self):
++        self.assertEqual(self.app.client_manager.object.endpoint, AUTH_URL)
++        self.assertEqual(self.app.client_manager.object.token, AUTH_TOKEN)
++
++
++@mock.patch(
++    'openstackclient.object.v1.object.lib_object.list_objects'
++)
++class TestObjectList(TestObject):
++
++    def setUp(self):
++        super(TestObjectList, self).setUp()
++
++        # Get the command object to test
++        self.cmd = obj.ListObject(self.app, None)
++
++    def test_object_list_objects_no_options(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT),
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            object_fakes.container_name,
++        ]
++        verifylist = [
++            ('container', object_fakes.container_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_1, ),
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_prefix(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--prefix', 'floppy',
++            object_fakes.container_name_2,
++        ]
++        verifylist = [
++            ('prefix', 'floppy'),
++            ('container', object_fakes.container_name_2),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'prefix': 'floppy',
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name_2,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_delimiter(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--delimiter', '=',
++            object_fakes.container_name_2,
++        ]
++        verifylist = [
++            ('delimiter', '='),
++            ('container', object_fakes.container_name_2),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'delimiter': '=',
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name_2,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_marker(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--marker', object_fakes.object_name_2,
++            object_fakes.container_name_2,
++        ]
++        verifylist = [
++            ('marker', object_fakes.object_name_2),
++            ('container', object_fakes.container_name_2),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'marker': object_fakes.object_name_2,
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name_2,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_end_marker(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--end-marker', object_fakes.object_name_2,
++            object_fakes.container_name_2,
++        ]
++        verifylist = [
++            ('end_marker', object_fakes.object_name_2),
++            ('container', object_fakes.container_name_2),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'end_marker': object_fakes.object_name_2,
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name_2,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_limit(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--limit', '2',
++            object_fakes.container_name_2,
++        ]
++        verifylist = [
++            ('limit', 2),
++            ('container', object_fakes.container_name_2),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'limit': 2,
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name_2,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_long(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT),
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--long',
++            object_fakes.container_name,
++        ]
++        verifylist = [
++            ('long', True),
++            ('container', object_fakes.container_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++            **kwargs
++        )
++
++        collist = ('Name', 'Bytes', 'Hash', 'Content Type', 'Last Modified')
++        self.assertEqual(columns, collist)
++        datalist = (
++            (
++                object_fakes.object_name_1,
++                object_fakes.object_bytes_1,
++                object_fakes.object_hash_1,
++                object_fakes.object_content_type_1,
++                object_fakes.object_modified_1,
++            ),
++            (
++                object_fakes.object_name_2,
++                object_fakes.object_bytes_2,
++                object_fakes.object_hash_2,
++                object_fakes.object_content_type_2,
++                object_fakes.object_modified_2,
++            ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++    def test_object_list_objects_all(self, o_mock):
++        o_mock.return_value = [
++            copy.deepcopy(object_fakes.OBJECT),
++            copy.deepcopy(object_fakes.OBJECT_2),
++        ]
++
++        arglist = [
++            '--all',
++            object_fakes.container_name,
++        ]
++        verifylist = [
++            ('all', True),
++            ('container', object_fakes.container_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++            'full_listing': True,
++        }
++        o_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++            **kwargs
++        )
++
++        collist = ('Name',)
++        self.assertEqual(columns, collist)
++        datalist = (
++            (object_fakes.object_name_1, ),
++            (object_fakes.object_name_2, ),
++        )
++        self.assertEqual(tuple(data), datalist)
++
++
++@mock.patch(
++    'openstackclient.object.v1.object.lib_object.show_object'
++)
++class TestObjectShow(TestObject):
++
++    def setUp(self):
++        super(TestObjectShow, self).setUp()
++
++        # Get the command object to test
++        self.cmd = obj.ShowObject(self.app, None)
++
++    def test_object_show(self, c_mock):
++        c_mock.return_value = copy.deepcopy(object_fakes.OBJECT)
++
++        arglist = [
++            object_fakes.container_name,
++            object_fakes.object_name_1,
++        ]
++        verifylist = [
++            ('container', object_fakes.container_name),
++            ('object', object_fakes.object_name_1),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        kwargs = {
++        }
++        # lib.container.show_container(api, url, container)
++        c_mock.assert_called_with(
++            self.app.restapi,
++            AUTH_URL,
++            object_fakes.container_name,
++            object_fakes.object_name_1,
++            **kwargs
++        )
++
++        collist = ('bytes', 'content_type', 'hash', 'last_modified', 'name')
++        self.assertEqual(columns, collist)
++        datalist = (
++            object_fakes.object_bytes_1,
++            object_fakes.object_content_type_1,
++            object_fakes.object_hash_1,
++            object_fakes.object_modified_1,
++            object_fakes.object_name_1,
++        )
++        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/volume/v1/fakes.py b/openstackclient/tests/volume/v1/fakes.py
+index a382dbb..b25dfaf 100644
+--- a/openstackclient/tests/volume/v1/fakes.py
++++ b/openstackclient/tests/volume/v1/fakes.py
+@@ -16,6 +16,9 @@
+ import mock
+ 
+ from openstackclient.tests import fakes
++from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
++from openstackclient.tests import utils
++
+ 
+ volume_id = 'vvvvvvvv-vvvv-vvvv-vvvvvvvv'
+ volume_name = 'nigel'
+@@ -42,3 +45,18 @@ class FakeVolumev1Client(object):
+         self.services.resource_class = fakes.FakeResource(None, {})
+         self.auth_token = kwargs['token']
+         self.management_url = kwargs['endpoint']
++
++
++class TestVolumev1(utils.TestCommand):
++    def setUp(self):
++        super(TestVolumev1, self).setUp()
++
++        self.app.client_manager.volume = FakeVolumev1Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
++
++        self.app.client_manager.identity = identity_fakes.FakeIdentityv2Client(
++            endpoint=fakes.AUTH_URL,
++            token=fakes.AUTH_TOKEN,
++        )
+diff --git a/openstackclient/tests/volume/v1/test_volume.py b/openstackclient/tests/volume/v1/test_volume.py
+index 58024f0..4e033df 100644
+--- a/openstackclient/tests/volume/v1/test_volume.py
++++ b/openstackclient/tests/volume/v1/test_volume.py
+@@ -1,4 +1,4 @@
+-#   Copyright 2013 OpenStack, LLC.
++#   Copyright 2013 Nebula Inc.
+ #
+ #   Licensed under the Apache License, Version 2.0 (the "License"); you may
+ #   not use this file except in compliance with the License. You may obtain
+@@ -13,25 +13,256 @@
+ #   under the License.
+ #
+ 
++import copy
++
++from openstackclient.tests import fakes
+ from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
+-from openstackclient.tests import utils
+-from openstackclient.tests.volume.v1 import fakes
++from openstackclient.tests.volume.v1 import fakes as volume_fakes
++from openstackclient.volume.v1 import volume
++
++
++class TestVolume(volume_fakes.TestVolumev1):
++
++    def setUp(self):
++        super(TestVolume, self).setUp()
+ 
++        # Get a shortcut to the VolumeManager Mock
++        self.volumes_mock = self.app.client_manager.volume.volumes
++        self.volumes_mock.reset_mock()
+ 
+-AUTH_TOKEN = "foobar"
+-AUTH_URL = "http://0.0.0.0"
++        # Get a shortcut to the TenantManager Mock
++        self.projects_mock = self.app.client_manager.identity.tenants
++        self.projects_mock.reset_mock()
+ 
++        # Get a shortcut to the UserManager Mock
++        self.users_mock = self.app.client_manager.identity.users
++        self.users_mock.reset_mock()
++
++
++# TODO(dtroyer): The volume create tests are incomplete, only the minimal
++#                options and the options that require additional processing
++#                are implemented at this time.
++
++class TestVolumeCreate(TestVolume):
+ 
+-class TestVolumev1(utils.TestCommand):
+     def setUp(self):
+-        super(TestVolumev1, self).setUp()
++        super(TestVolumeCreate, self).setUp()
++
++        self.volumes_mock.create.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(volume_fakes.VOLUME),
++            loaded=True,
++        )
++
++        # Get the command object to test
++        self.cmd = volume.CreateVolume(self.app, None)
++
++    def test_volume_create_min_options(self):
++        arglist = [
++            '--size', str(volume_fakes.volume_size),
++            volume_fakes.volume_name,
++        ]
++        verifylist = [
++            ('size', volume_fakes.volume_size),
++            ('name', volume_fakes.volume_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        #kwargs = {
++        #    'metadata': volume_fakes.volume_metadata,
++        #}
++        # VolumeManager.create(size, snapshot_id=, source_volid=,
++        #                      display_name=, display_description=,
++        #                      volume_type=, user_id=,
++        #                      project_id=, availability_zone=,
++        #                      metadata=, imageRef=)
++        self.volumes_mock.create.assert_called_with(
++            volume_fakes.volume_size,
++            None,
++            None,
++            volume_fakes.volume_name,
++            None,
++            None,
++            None,
++            None,
++            None,
++            None,
++            None,
++        )
++
++        collist = (
++            'attach_status',
++            'display_description',
++            'display_name',
++            'id',
++            'properties',
++            'size',
++            'status',
++        )
++        self.assertEqual(columns, collist)
++        datalist = (
++            'detatched',
++            volume_fakes.volume_description,
++            volume_fakes.volume_name,
++            volume_fakes.volume_id,
++            '',
++            volume_fakes.volume_size,
++            '',
++        )
++        self.assertEqual(data, datalist)
++
++    def test_volume_create_user_project_id(self):
++        # Return a project
++        self.projects_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.PROJECT),
++            loaded=True,
++        )
++        # Return a user
++        self.users_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.USER),
++            loaded=True,
++        )
++
++        arglist = [
++            '--size', str(volume_fakes.volume_size),
++            '--project', identity_fakes.project_id,
++            '--user', identity_fakes.user_id,
++            volume_fakes.volume_name,
++        ]
++        verifylist = [
++            ('size', volume_fakes.volume_size),
++            ('project', identity_fakes.project_id),
++            ('user', identity_fakes.user_id),
++            ('name', volume_fakes.volume_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+ 
+-        self.app.client_manager.volume = fakes.FakeVolumev1Client(
+-            endpoint=AUTH_URL,
+-            token=AUTH_TOKEN,
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        #kwargs = {
++        #    'metadata': volume_fakes.volume_metadata,
++        #}
++        # VolumeManager.create(size, snapshot_id=, source_volid=,
++        #                      display_name=, display_description=,
++        #                      volume_type=, user_id=,
++        #                      project_id=, availability_zone=,
++        #                      metadata=, imageRef=)
++        self.volumes_mock.create.assert_called_with(
++            volume_fakes.volume_size,
++            None,
++            None,
++            volume_fakes.volume_name,
++            #volume_fakes.volume_description,
++            None,
++            None,
++            identity_fakes.user_id,
++            identity_fakes.project_id,
++            None,
++            None,
++            None,
++        )
++
++        collist = (
++            'attach_status',
++            'display_description',
++            'display_name',
++            'id',
++            'properties',
++            'size',
++            'status',
++        )
++        self.assertEqual(columns, collist)
++        datalist = (
++            'detatched',
++            volume_fakes.volume_description,
++            volume_fakes.volume_name,
++            volume_fakes.volume_id,
++            '',
++            volume_fakes.volume_size,
++            '',
+         )
++        self.assertEqual(data, datalist)
+ 
+-        self.app.client_manager.identity = identity_fakes.FakeIdentityv2Client(
+-            endpoint=AUTH_URL,
+-            token=AUTH_TOKEN,
++    def test_volume_create_user_project_name(self):
++        # Return a project
++        self.projects_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.PROJECT),
++            loaded=True,
++        )
++        # Return a user
++        self.users_mock.get.return_value = fakes.FakeResource(
++            None,
++            copy.deepcopy(identity_fakes.USER),
++            loaded=True,
++        )
++
++        arglist = [
++            '--size', str(volume_fakes.volume_size),
++            '--project', identity_fakes.project_name,
++            '--user', identity_fakes.user_name,
++            volume_fakes.volume_name,
++        ]
++        verifylist = [
++            ('size', volume_fakes.volume_size),
++            ('project', identity_fakes.project_name),
++            ('user', identity_fakes.user_name),
++            ('name', volume_fakes.volume_name),
++        ]
++        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
++
++        # DisplayCommandBase.take_action() returns two tuples
++        columns, data = self.cmd.take_action(parsed_args)
++
++        # Set expected values
++        #kwargs = {
++        #    'metadata': volume_fakes.volume_metadata,
++        #}
++        # VolumeManager.create(size, snapshot_id=, source_volid=,
++        #                      display_name=, display_description=,
++        #                      volume_type=, user_id=,
++        #                      project_id=, availability_zone=,
++        #                      metadata=, imageRef=)
++        self.volumes_mock.create.assert_called_with(
++            volume_fakes.volume_size,
++            None,
++            None,
++            volume_fakes.volume_name,
++            #volume_fakes.volume_description,
++            None,
++            None,
++            identity_fakes.user_id,
++            identity_fakes.project_id,
++            None,
++            None,
++            None,
++        )
++
++        collist = (
++            'attach_status',
++            'display_description',
++            'display_name',
++            'id',
++            'properties',
++            'size',
++            'status',
++        )
++        self.assertEqual(columns, collist)
++        datalist = (
++            'detatched',
++            volume_fakes.volume_description,
++            volume_fakes.volume_name,
++            volume_fakes.volume_id,
++            '',
++            volume_fakes.volume_size,
++            '',
+         )
++        self.assertEqual(data, datalist)
+diff --git a/openstackclient/tests/volume/v1/test_volumecmd.py b/openstackclient/tests/volume/v1/test_volumecmd.py
+deleted file mode 100644
+index 1f5ed88..0000000
+--- a/openstackclient/tests/volume/v1/test_volumecmd.py
++++ /dev/null
+@@ -1,269 +0,0 @@
+-#   Copyright 2013 Nebula Inc.
+-#
+-#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+-#   not use this file except in compliance with the License. You may obtain
+-#   a copy of the License at
+-#
+-#        http://www.apache.org/licenses/LICENSE-2.0
+-#
+-#   Unless required by applicable law or agreed to in writing, software
+-#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+-#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+-#   License for the specific language governing permissions and limitations
+-#   under the License.
+-#
+-
+-import copy
+-
+-from openstackclient.tests import fakes
+-from openstackclient.tests.identity.v2_0 import fakes as identity_fakes
+-from openstackclient.tests.volume.v1 import fakes as volume_fakes
+-from openstackclient.tests.volume.v1 import test_volume
+-from openstackclient.volume.v1 import volume
+-
+-
+-class TestVolume(test_volume.TestVolumev1):
+-
+-    def setUp(self):
+-        super(TestVolume, self).setUp()
+-
+-        # Get a shortcut to the VolumeManager Mock
+-        self.volumes_mock = self.app.client_manager.volume.volumes
+-        self.volumes_mock.reset_mock()
+-
+-        # Get a shortcut to the TenantManager Mock
+-        self.projects_mock = self.app.client_manager.identity.tenants
+-        self.projects_mock.reset_mock()
+-
+-        # Get a shortcut to the UserManager Mock
+-        self.users_mock = self.app.client_manager.identity.users
+-        self.users_mock.reset_mock()
+-
+-
+-# TODO(dtroyer): The volume create tests are incomplete, only the minimal
+-#                options and the options that require additional processing
+-#                are implemented at this time.
+-
+-class TestVolumeCreate(TestVolume):
+-
+-    def setUp(self):
+-        super(TestVolumeCreate, self).setUp()
+-
+-        self.volumes_mock.create.return_value = fakes.FakeResource(
+-            None,
+-            copy.deepcopy(volume_fakes.VOLUME),
+-            loaded=True,
+-        )
+-
+-        # Get the command object to test
+-        self.cmd = volume.CreateVolume(self.app, None)
+-
+-    def test_volume_create_min_options(self):
+-        arglist = [
+-            '--size', str(volume_fakes.volume_size),
+-            volume_fakes.volume_name,
+-        ]
+-        verifylist = [
+-            ('size', volume_fakes.volume_size),
+-            ('name', volume_fakes.volume_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        #kwargs = {
+-        #    'metadata': volume_fakes.volume_metadata,
+-        #}
+-        # VolumeManager.create(size, snapshot_id=, source_volid=,
+-        #                      display_name=, display_description=,
+-        #                      volume_type=, user_id=,
+-        #                      project_id=, availability_zone=,
+-        #                      metadata=, imageRef=)
+-        self.volumes_mock.create.assert_called_with(
+-            volume_fakes.volume_size,
+-            None,
+-            None,
+-            volume_fakes.volume_name,
+-            None,
+-            None,
+-            None,
+-            None,
+-            None,
+-            None,
+-            None,
+-        )
+-
+-        collist = (
+-            'attach_status',
+-            'display_description',
+-            'display_name',
+-            'id',
+-            'properties',
+-            'size',
+-            'status',
+-        )
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            'detatched',
+-            volume_fakes.volume_description,
+-            volume_fakes.volume_name,
+-            volume_fakes.volume_id,
+-            '',
+-            volume_fakes.volume_size,
+-            '',
+-        )
+-        self.assertEqual(data, datalist)
+-
+-    def test_volume_create_user_project_id(self):
+-        # Return a project
+-        self.projects_mock.get.return_value = fakes.FakeResource(
+-            None,
+-            copy.deepcopy(identity_fakes.PROJECT),
+-            loaded=True,
+-        )
+-        # Return a user
+-        self.users_mock.get.return_value = fakes.FakeResource(
+-            None,
+-            copy.deepcopy(identity_fakes.USER),
+-            loaded=True,
+-        )
+-
+-        arglist = [
+-            '--size', str(volume_fakes.volume_size),
+-            '--project', identity_fakes.project_id,
+-            '--user', identity_fakes.user_id,
+-            volume_fakes.volume_name,
+-        ]
+-        verifylist = [
+-            ('size', volume_fakes.volume_size),
+-            ('project', identity_fakes.project_id),
+-            ('user', identity_fakes.user_id),
+-            ('name', volume_fakes.volume_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        #kwargs = {
+-        #    'metadata': volume_fakes.volume_metadata,
+-        #}
+-        # VolumeManager.create(size, snapshot_id=, source_volid=,
+-        #                      display_name=, display_description=,
+-        #                      volume_type=, user_id=,
+-        #                      project_id=, availability_zone=,
+-        #                      metadata=, imageRef=)
+-        self.volumes_mock.create.assert_called_with(
+-            volume_fakes.volume_size,
+-            None,
+-            None,
+-            volume_fakes.volume_name,
+-            #volume_fakes.volume_description,
+-            None,
+-            None,
+-            identity_fakes.user_id,
+-            identity_fakes.project_id,
+-            None,
+-            None,
+-            None,
+-        )
+-
+-        collist = (
+-            'attach_status',
+-            'display_description',
+-            'display_name',
+-            'id',
+-            'properties',
+-            'size',
+-            'status',
+-        )
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            'detatched',
+-            volume_fakes.volume_description,
+-            volume_fakes.volume_name,
+-            volume_fakes.volume_id,
+-            '',
+-            volume_fakes.volume_size,
+-            '',
+-        )
+-        self.assertEqual(data, datalist)
+-
+-    def test_volume_create_user_project_name(self):
+-        # Return a project
+-        self.projects_mock.get.return_value = fakes.FakeResource(
+-            None,
+-            copy.deepcopy(identity_fakes.PROJECT),
+-            loaded=True,
+-        )
+-        # Return a user
+-        self.users_mock.get.return_value = fakes.FakeResource(
+-            None,
+-            copy.deepcopy(identity_fakes.USER),
+-            loaded=True,
+-        )
+-
+-        arglist = [
+-            '--size', str(volume_fakes.volume_size),
+-            '--project', identity_fakes.project_name,
+-            '--user', identity_fakes.user_name,
+-            volume_fakes.volume_name,
+-        ]
+-        verifylist = [
+-            ('size', volume_fakes.volume_size),
+-            ('project', identity_fakes.project_name),
+-            ('user', identity_fakes.user_name),
+-            ('name', volume_fakes.volume_name),
+-        ]
+-        parsed_args = self.check_parser(self.cmd, arglist, verifylist)
+-
+-        # DisplayCommandBase.take_action() returns two tuples
+-        columns, data = self.cmd.take_action(parsed_args)
+-
+-        # Set expected values
+-        #kwargs = {
+-        #    'metadata': volume_fakes.volume_metadata,
+-        #}
+-        # VolumeManager.create(size, snapshot_id=, source_volid=,
+-        #                      display_name=, display_description=,
+-        #                      volume_type=, user_id=,
+-        #                      project_id=, availability_zone=,
+-        #                      metadata=, imageRef=)
+-        self.volumes_mock.create.assert_called_with(
+-            volume_fakes.volume_size,
+-            None,
+-            None,
+-            volume_fakes.volume_name,
+-            #volume_fakes.volume_description,
+-            None,
+-            None,
+-            identity_fakes.user_id,
+-            identity_fakes.project_id,
+-            None,
+-            None,
+-            None,
+-        )
+-
+-        collist = (
+-            'attach_status',
+-            'display_description',
+-            'display_name',
+-            'id',
+-            'properties',
+-            'size',
+-            'status',
+-        )
+-        self.assertEqual(columns, collist)
+-        datalist = (
+-            'detatched',
+-            volume_fakes.volume_description,
+-            volume_fakes.volume_name,
+-            volume_fakes.volume_id,
+-            '',
+-            volume_fakes.volume_size,
+-            '',
+-        )
+-        self.assertEqual(data, datalist)

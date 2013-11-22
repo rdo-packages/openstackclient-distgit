@@ -1,0 +1,20 @@
+From 4c3035f1e71ca6fe11fc3296d5955ed0bd7a491b Mon Sep 17 00:00:00 2001
+From: OpenStack Jenkins <jenkins@openstack.org>
+Date: Wed, 16 Oct 2013 12:21:38 +0000
+Subject: [PATCH] Updated from global requirements
+
+Change-Id: I2a306dd8edc030d3f989e9947dec784f502b3953
+---
+ test-requirements.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test-requirements.txt b/test-requirements.txt
+index 27de420..77788e6 100644
+--- a/test-requirements.txt
++++ b/test-requirements.txt
+@@ -11,4 +11,4 @@ testrepository>=0.0.17
+ testtools>=0.9.32
+ WebOb>=1.2.3,<1.3
+ 
+-Babel>=0.9.6
++Babel>=1.3

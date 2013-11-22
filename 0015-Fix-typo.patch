@@ -1,0 +1,23 @@
+From 58d058ae3030b928529e7fb39b88bd2eeaeda013 Mon Sep 17 00:00:00 2001
+From: Noorul Islam K M <noorul@noorul.com>
+Date: Tue, 19 Nov 2013 19:57:02 +0530
+Subject: [PATCH] Fix typo
+
+Change-Id: I7bca8b76c6746121314e688e9ed3825e04350b8d
+---
+ openstackclient/common/commandmanager.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/openstackclient/common/commandmanager.py b/openstackclient/common/commandmanager.py
+index e366034..06073d9 100644
+--- a/openstackclient/common/commandmanager.py
++++ b/openstackclient/common/commandmanager.py
+@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
+ 
+ 
+ class CommandManager(cliff.commandmanager.CommandManager):
+-    """Alters Cliff's default CommandManager behaviour to load additiona
++    """Alters Cliff's default CommandManager behaviour to load additional
+        command groups after initialization.
+     """
+     def _load_commands(self, group=None):
