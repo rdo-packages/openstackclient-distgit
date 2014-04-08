@@ -1,6 +1,6 @@
 Name:             python-openstackclient
 Version:          0.3.1
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          OpenStack Command-line Client
 
 Group:            Development/Languages
@@ -58,11 +58,14 @@ This package contains auto-generated documentation.
 
 %patch0001 -p1
 
-# Remove bundled egg-info
-rm -rf python_openstackclient.egg-info
+# We provide version like this in order to remove runtime dep on pbr
+sed -i s/REDHATOPENSTACKCLIENTVERSION/%{version}/ openstackclient/__init__.py
 
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
+
+# Remove bundled egg-info
+rm -rf python_openstackclient.egg-info
 
 %build
 %{__python2} setup.py build
@@ -93,6 +96,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Tue Apr 08 2014 Jakub Ruzicka <jruzicka@redhat.com> 0.3.1-2
+- Fix version info
+
 * Tue Apr 08 2014 Jakub Ruzicka <jruzicka@redhat.com> 0.3.1-1
 - Update to upstream 0.3.1
 - Remove runtime dependency on python-pbr
