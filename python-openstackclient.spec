@@ -1,5 +1,5 @@
 Name:             python-openstackclient
-Version:          0.3.0
+Version:          0.3.1
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -9,8 +9,9 @@ URL:              http://github.com/openstack/python-openstackclient
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
 #
-# patches_base=0.3.0+1
+# patches_base=0.3.1+1
 #
+Patch0001: 0001-Remove-runtime-dependency-on-python-pbr.patch
 
 BuildArch:        noarch
 
@@ -55,6 +56,7 @@ This package contains auto-generated documentation.
 %prep
 %setup -q
 
+%patch0001 -p1
 
 # Remove bundled egg-info
 rm -rf python_openstackclient.egg-info
@@ -91,6 +93,10 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Tue Apr 08 2014 Jakub Ruzicka <jruzicka@redhat.com> 0.3.1-1
+- Update to upstream 0.3.1
+- Remove runtime dependency on python-pbr
+
 * Wed Jan 08 2014 Jakub Ruzicka <jruzicka@redhat.com> 0.3.0-1
 - Update to upstream 0.3.0
 - New dependencies: python-six, python-requests

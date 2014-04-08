@@ -1,0 +1,42 @@
+From b4b3973644242b7e5ea5ef9eb2ab3a5a464653f1 Mon Sep 17 00:00:00 2001
+From: Jakub Ruzicka <jruzicka@redhat.com>
+Date: Tue, 8 Apr 2014 15:50:33 +0200
+Subject: [PATCH] Remove runtime dependency on python-pbr
+
+Also remove pbr/pkg_resources requirements handling.
+
+ERROR: openstackclient.shell Exception raised: \
+  (pycrypto 2.0.1 (/usr/lib64/python2.6/site-packages), Requirement.parse('pycrypto>=2.6'))
+
+DO NOT WANT
+---
+ openstackclient/__init__.py | 8 +-------
+ setup.py                    | 1 -
+ 2 files changed, 1 insertion(+), 8 deletions(-)
+
+diff --git a/openstackclient/__init__.py b/openstackclient/__init__.py
+index 89deee3..b55482b 100644
+--- a/openstackclient/__init__.py
++++ b/openstackclient/__init__.py
+@@ -13,10 +13,4 @@
+ 
+ __all__ = ['__version__']
+ 
+-import pbr.version
+-
+-version_info = pbr.version.VersionInfo('python-openstackclient')
+-try:
+-    __version__ = version_info.version_string()
+-except AttributeError:
+-    __version__ = None
++__version__ = 'REDHATOPENSTACKCLIENTVERSION'
+diff --git a/setup.py b/setup.py
+index 70c2b3f..afab729 100644
+--- a/setup.py
++++ b/setup.py
+@@ -18,5 +18,4 @@
+ import setuptools
+ 
+ setuptools.setup(
+-    setup_requires=['pbr'],
+     pbr=True)
