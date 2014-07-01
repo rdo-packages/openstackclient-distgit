@@ -20,6 +20,7 @@ BuildRequires:    python-setuptools
 BuildRequires:    python-pbr
 BuildRequires:    python-d2to1
 BuildRequires:    python-sphinx
+BuildRequires:    git
 
 Requires:         python-pbr
 Requires:         python-cliff
@@ -56,7 +57,14 @@ This package contains auto-generated documentation.
 %prep
 %setup -q
 
-%patch0001 -p1
+# Use git to manage patches.
+# http://rwmj.wordpress.com/2011/08/09/nice-rpm-git-patch-management-trick/
+git init
+git config user.email "%{name}-owner@fedoraproject.org"
+git config user.name "%{name}"
+git add .
+git commit -a -q -m "%{version} baseline"
+git am %{patches}
 
 # We provide version like this in order to remove runtime dep on pbr
 sed -i s/REDHATOPENSTACKCLIENTVERSION/%{version}/ openstackclient/__init__.py
