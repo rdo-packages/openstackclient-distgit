@@ -1,6 +1,6 @@
 Name:             python-openstackclient
-Version:          0.3.1
-Release:          3%{?dist}
+Version:          0.4.1
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 Group:            Development/Languages
@@ -8,9 +8,6 @@ License:          ASL 2.0
 URL:              http://github.com/openstack/python-openstackclient
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
-#
-# patches_base=0.3.1+1
-#
 Patch0001: 0001-Remove-runtime-dependency-on-python-pbr.patch
 
 BuildArch:        noarch
@@ -19,17 +16,17 @@ BuildRequires:    python2-devel
 BuildRequires:    python-setuptools
 BuildRequires:    python-pbr
 BuildRequires:    python-d2to1
-BuildRequires:    python-sphinx
+BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
 
 Requires:         python-pbr
 Requires:         python-cliff
-Requires:         python-keyring
 Requires:         python-crypto
 Requires:         python-glanceclient
 Requires:         python-keystoneclient
 Requires:         python-novaclient
 Requires:         python-cinderclient
+Requires:         python-neutronclient
 Requires:         python-six
 Requires:         python-requests
 
@@ -75,6 +72,8 @@ rm -rf requirements.txt test-requirements.txt
 # Remove bundled egg-info
 rm -rf python_openstackclient.egg-info
 
+sed -i 's/oslosphinx/oslo.sphinx/' doc/source/conf.py
+
 %build
 %{__python2} setup.py build
 
@@ -104,6 +103,12 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Fri Sep 26 2014 Jakub Ruzicka <jruzicka@redhat.com> 0.4.1-1
+- Update to upstream 0.4.1
+- New Requires: python-neutronclient, python-oslo-sphinx
+- Removed Requires: python-keyring, python-sphinx
+- oslosphinx -> oslo.sphinx
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0.3.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
