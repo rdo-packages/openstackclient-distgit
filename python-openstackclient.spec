@@ -1,5 +1,5 @@
 Name:             python-openstackclient
-Version:          0.4.1
+Version:          1.0.1
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -19,9 +19,12 @@ BuildRequires:    python-d2to1
 BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
 
-Requires:         python-pbr
+Requires:         python-babel
 Requires:         python-cliff
 Requires:         python-crypto
+Requires:         python-oslo-i18n
+Requires:         python-oslo-utils
+Requires:         python-oslo-serialization
 Requires:         python-glanceclient
 Requires:         python-keystoneclient
 Requires:         python-novaclient
@@ -29,6 +32,7 @@ Requires:         python-cinderclient
 Requires:         python-neutronclient
 Requires:         python-six
 Requires:         python-requests
+Requires:         python-stevedore
 
 %description
 python-openstackclient is a unified command-line client for the OpenStack APIs.
@@ -103,6 +107,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Wed Dec 10 2014 Jakub Ruzicka <jruzicka@redhat.com> 1.0.1-1
+- Update to upstream 1.0.1
+
 * Fri Sep 26 2014 Jakub Ruzicka <jruzicka@redhat.com> 0.4.1-1
 - Update to upstream 0.4.1
 - New Requires: python-neutronclient, python-oslo-sphinx
