@@ -8,8 +8,6 @@ License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
-Patch0001: 0001-Remove-runtime-dependency-on-python-pbr.patch
-
 BuildArch:        noarch
 
 BuildRequires:    python2-devel
@@ -19,6 +17,7 @@ BuildRequires:    python-d2to1
 BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
 
+Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
 Requires:         python-crypto
@@ -57,18 +56,6 @@ This package contains auto-generated documentation.
 
 %prep
 %setup -q -n %{name}-%{upstream_version}
-
-# Use git to manage patches.
-# http://rwmj.wordpress.com/2011/08/09/nice-rpm-git-patch-management-trick/
-git init
-git config user.email "%{name}-owner@fedoraproject.org"
-git config user.name "%{name}"
-git add .
-git commit -a -q -m "%{version} baseline"
-git am %{patches}
-
-# We provide version like this in order to remove runtime dep on pbr
-sed -i s/REDHATOPENSTACKCLIENTVERSION/%{version}/ openstackclient/__init__.py
 
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
