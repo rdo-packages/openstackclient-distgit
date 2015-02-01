@@ -1,11 +1,11 @@
 Name:             python-openstackclient
-Version:          1.0.1
-Release:          1%{?dist}
+Version:          XXX
+Release:          XXX{?dist}
 Summary:          OpenStack Command-line Client
 
 Group:            Development/Languages
 License:          ASL 2.0
-URL:              http://github.com/openstack/python-openstackclient
+URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
 Patch0001: 0001-Remove-runtime-dependency-on-python-pbr.patch
@@ -56,7 +56,7 @@ This package contains auto-generated documentation.
 
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{upstream_version}
 
 # Use git to manage patches.
 # http://rwmj.wordpress.com/2011/08/09/nice-rpm-git-patch-management-trick/
@@ -75,8 +75,6 @@ rm -rf requirements.txt test-requirements.txt
 
 # Remove bundled egg-info
 rm -rf python_openstackclient.egg-info
-
-sed -i 's/oslosphinx/oslo.sphinx/' doc/source/conf.py
 
 %build
 %{__python2} setup.py build
