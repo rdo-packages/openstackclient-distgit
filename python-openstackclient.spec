@@ -60,9 +60,6 @@ This package contains auto-generated documentation.
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
 
-# Remove bundled egg-info
-rm -rf python_openstackclient.egg-info
-
 %build
 %{__python2} setup.py build
 
