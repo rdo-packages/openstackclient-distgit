@@ -1,5 +1,5 @@
 Name:             python-openstackclient
-Version:          1.0.1
+Version:          1.0.3
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -107,6 +107,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Tue Mar 31 2015 Jakub Ruzicka <jruzicka@redhat.com> 1.0.3-1
+- Update to upstream 1.0.3
+
 * Wed Dec 10 2014 Jakub Ruzicka <jruzicka@redhat.com> 1.0.1-1
 - Update to upstream 1.0.1
 
