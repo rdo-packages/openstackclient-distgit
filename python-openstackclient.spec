@@ -33,7 +33,6 @@ Requires:         python-neutronclient
 Requires:         python-six
 Requires:         python-requests
 Requires:         python-stevedore
-Requires:         os-client-config
 
 %description
 python-openstackclient is a unified command-line client for the OpenStack APIs.
