@@ -1,14 +1,17 @@
 Name:             python-openstackclient
 Version:          1.0.3
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          OpenStack Command-line Client
 
 Group:            Development/Languages
 License:          ASL 2.0
-URL:              http://github.com/openstack/python-openstackclient
+URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
-Patch0001: 0001-Remove-runtime-dependency-on-python-pbr.patch
+#
+# patches_base=+1
+#
+Patch0001: 0001-Add-the-ability-to-set-and-unset-flavor-properties.patch
 
 BuildArch:        noarch
 
@@ -19,6 +22,7 @@ BuildRequires:    python-d2to1
 BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
 
+Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
 Requires:         python-crypto
@@ -67,9 +71,6 @@ git add .
 git commit -a -q -m "%{version} baseline"
 git am %{patches}
 
-# We provide version like this in order to remove runtime dep on pbr
-sed -i s/REDHATOPENSTACKCLIENTVERSION/%{version}/ openstackclient/__init__.py
-
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
 
@@ -97,16 +98,23 @@ install -p -D -m 644 man/openstack.1 %{buildroot}%{_mandir}/man1/openstack.1
 rm -fr html/.doctrees html/.buildinfo
 
 %files
-%doc LICENSE README.rst
+%license LICENSE
+%doc README.rst
 %{_bindir}/openstack
 %{python_sitelib}/openstackclient
 %{python_sitelib}/*.egg-info
 %{_mandir}/man1/openstack.1*
 
 %files doc
+%license LICENSE
 %doc html
 
 %changelog
+* Wed Apr 29 2015 Jakub Ruzicka <jruzicka@redhat.com> 1.0.3-2
+- Give up nuking pbr
+- Add the ability to set and unset flavor properties
+- Use %license
+
 * Tue Mar 31 2015 Jakub Ruzicka <jruzicka@redhat.com> 1.0.3-1
 - Update to upstream 1.0.3
 
