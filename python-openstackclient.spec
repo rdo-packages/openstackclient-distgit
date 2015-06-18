@@ -1,6 +1,6 @@
 Name:             python-openstackclient
 Version:          1.0.3
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          OpenStack Command-line Client
 
 Group:            Development/Languages
@@ -110,6 +110,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.3-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Wed Apr 29 2015 Jakub Ruzicka <jruzicka@redhat.com> 1.0.3-2
 - Give up nuking pbr
 - Add the ability to set and unset flavor properties
