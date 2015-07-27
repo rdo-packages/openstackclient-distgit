@@ -1,6 +1,6 @@
 Name:             python-openstackclient
-Version:          1.0.3
-Release:          3%{?dist}
+Version:          1.5.0
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 Group:            Development/Languages
@@ -110,6 +110,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Mon Jul 27 2015 Parag Nemade <pnemade AT fedoraproject DOT org> 1.5.0-1
+- Update to upstream 1.5.0
+
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.3-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
