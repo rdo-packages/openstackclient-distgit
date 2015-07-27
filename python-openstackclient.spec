@@ -8,11 +8,6 @@ License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
-#
-# patches_base=+1
-#
-Patch0001: 0001-Add-the-ability-to-set-and-unset-flavor-properties.patch
-
 BuildArch:        noarch
 
 BuildRequires:    python2-devel
@@ -21,6 +16,19 @@ BuildRequires:    python-pbr
 BuildRequires:    python-d2to1
 BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
+BuildRequires:    python-six
+BuildRequires:    python-cliff
+BuildRequires:    python-oslo-i18n
+BuildRequires:    python-oslo-utils
+BuildRequires:    python-simplejson
+BuildRequires:    python-requests
+BuildRequires:    python-glanceclient
+BuildRequires:    python-keystoneclient
+BuildRequires:    python-novaclient
+BuildRequires:    python-cinderclient
+BuildRequires:    python-neutronclient
+BuildRequires:    python-mock
+BuildRequires:    python-requests-mock
 
 Requires:         python-pbr
 Requires:         python-babel
@@ -61,15 +69,6 @@ This package contains auto-generated documentation.
 
 %prep
 %setup -q
-
-# Use git to manage patches.
-# http://rwmj.wordpress.com/2011/08/09/nice-rpm-git-patch-management-trick/
-git init
-git config user.email "%{name}-owner@fedoraproject.org"
-git config user.name "%{name}"
-git add .
-git commit -a -q -m "%{version} baseline"
-git am %{patches}
 
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
@@ -112,6 +111,7 @@ rm -fr html/.doctrees html/.buildinfo
 %changelog
 * Mon Jul 27 2015 Parag Nemade <pnemade AT fedoraproject DOT org> 1.5.0-1
 - Update to upstream 1.5.0
+- Drop upstream patch
 
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.3-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
