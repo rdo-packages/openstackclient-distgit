@@ -1,9 +1,8 @@
 Name:             python-openstackclient
 Version:          XXX
-Release:          XXX{?dist}
+Release:          XXX
 Summary:          OpenStack Command-line Client
 
-Group:            Development/Languages
 License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
@@ -20,6 +19,7 @@ BuildRequires:    git
 Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
+Requires:         python-cliff-tablib
 Requires:         python-crypto
 Requires:         python-oslo-config
 Requires:         python-oslo-i18n
@@ -30,8 +30,8 @@ Requires:         python-keystoneclient
 Requires:         python-novaclient
 Requires:         python-cinderclient
 Requires:         python-neutronclient
-Requires:         python-six
-Requires:         python-requests
+Requires:         python-six >= 1.9.0
+Requires:         python-requests >= 2.5.2
 Requires:         python-stevedore
 Requires:         os-client-config
 
@@ -42,7 +42,6 @@ actual REST API client actions.
 
 %package doc
 Summary:          Documentation for OpenStack Nova API Client
-Group:            Documentation
 
 BuildRequires:    python-sphinx
 
@@ -84,8 +83,8 @@ rm -fr html/.doctrees html/.buildinfo
 %license LICENSE
 %doc README.rst
 %{_bindir}/openstack
-%{python_sitelib}/openstackclient
-%{python_sitelib}/*.egg-info
+%{python2_sitelib}/openstackclient
+%{python2_sitelib}/*.egg-info
 %{_mandir}/man1/openstack.1*
 
 %files doc
