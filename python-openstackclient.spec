@@ -1,9 +1,8 @@
 Name:             python-openstackclient
-Version:          1.5.0
+Version:          1.6.0
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
-Group:            Development/Languages
 License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
@@ -33,7 +32,9 @@ BuildRequires:    python-requests-mock
 Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
+Requires:         python-cliff-tablib
 Requires:         python-crypto
+Requires:         python-oslo-config
 Requires:         python-oslo-i18n
 Requires:         python-oslo-utils
 Requires:         python-oslo-serialization
@@ -42,9 +43,10 @@ Requires:         python-keystoneclient
 Requires:         python-novaclient
 Requires:         python-cinderclient
 Requires:         python-neutronclient
-Requires:         python-six
-Requires:         python-requests
+Requires:         python-six >= 1.9.0
+Requires:         python-requests >= 2.5.2
 Requires:         python-stevedore
+Requires:         python-os-client-config
 
 %description
 python-openstackclient is a unified command-line client for the OpenStack APIs.
@@ -53,7 +55,6 @@ actual REST API client actions.
 
 %package doc
 Summary:          Documentation for OpenStack Nova API Client
-Group:            Documentation
 
 BuildRequires:    python-sphinx
 
@@ -72,11 +73,6 @@ This package contains auto-generated documentation.
 
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
-
-# Remove bundled egg-info
-rm -rf python_openstackclient.egg-info
-
-sed -i 's/oslosphinx/oslo.sphinx/' doc/source/conf.py
 
 %build
 %{__python2} setup.py build
@@ -100,8 +96,8 @@ rm -fr html/.doctrees html/.buildinfo
 %license LICENSE
 %doc README.rst
 %{_bindir}/openstack
-%{python_sitelib}/openstackclient
-%{python_sitelib}/*.egg-info
+%{python2_sitelib}/openstackclient
+%{python2_sitelib}/*.egg-info
 %{_mandir}/man1/openstack.1*
 
 %files doc
@@ -109,6 +105,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Mon Sep 21 2015 Alan Pevec <alan.pevec@redhat.com> 1.6.0-1
+- Update to upstream 1.6.0
+
 * Mon Jul 27 2015 Parag Nemade <pnemade AT fedoraproject DOT org> 1.5.0-1
 - Update to upstream 1.5.0
 - Drop upstream patch
