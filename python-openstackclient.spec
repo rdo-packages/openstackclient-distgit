@@ -15,6 +15,20 @@ BuildRequires:    python-pbr
 BuildRequires:    python-d2to1
 BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
+BuildRequires:    python-six
+BuildRequires:    python-cliff
+BuildRequires:    python-oslo-i18n
+BuildRequires:    python-oslo-utils
+BuildRequires:    python-simplejson
+BuildRequires:    python-requests
+BuildRequires:    python-glanceclient
+BuildRequires:    python-keystoneclient
+BuildRequires:    python-novaclient
+BuildRequires:    python-cinderclient
+BuildRequires:    python-neutronclient
+BuildRequires:    python-mock
+BuildRequires:    python-requests-mock
+BuildRequires:    python-os-client-config
 
 Requires:         python-pbr
 Requires:         python-babel
@@ -33,7 +47,7 @@ Requires:         python-neutronclient
 Requires:         python-six >= 1.9.0
 Requires:         python-requests >= 2.5.2
 Requires:         python-stevedore
-Requires:         os-client-config
+Requires:         python-os-client-config
 
 %description
 python-openstackclient is a unified command-line client for the OpenStack APIs.
@@ -66,9 +80,6 @@ rm -rf requirements.txt test-requirements.txt
 
 %install
 %{__python2} setup.py install -O1 --skip-build --root %{buildroot}
-
-# Delete tests
-rm -fr %{buildroot}%{python_sitelib}/openstackclient/tests
 
 export PYTHONPATH="$( pwd ):$PYTHONPATH"
 sphinx-build -b html doc/source html
