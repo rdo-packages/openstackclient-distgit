@@ -1,5 +1,5 @@
 Name:             python-openstackclient
-Version:          1.6.0
+Version:          1.7.1
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -28,6 +28,7 @@ BuildRequires:    python-cinderclient
 BuildRequires:    python-neutronclient
 BuildRequires:    python-mock
 BuildRequires:    python-requests-mock
+BuildRequires:    python-os-client-config
 
 Requires:         python-pbr
 Requires:         python-babel
@@ -80,9 +81,6 @@ rm -rf requirements.txt test-requirements.txt
 %install
 %{__python2} setup.py install -O1 --skip-build --root %{buildroot}
 
-# Delete tests
-rm -fr %{buildroot}%{python_sitelib}/openstackclient/tests
-
 export PYTHONPATH="$( pwd ):$PYTHONPATH"
 sphinx-build -b html doc/source html
 sphinx-build -b man doc/source man
@@ -105,6 +103,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Fri Oct 02 2015 Haikel Guemar <hguemar@fedoraproject.org> 1.7.1-1
+- Update to upstream 1.7.1
+
 * Mon Sep 21 2015 Alan Pevec <alan.pevec@redhat.com> 1.6.0-1
 - Update to upstream 1.6.0
 
