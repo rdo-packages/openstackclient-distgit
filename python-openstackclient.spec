@@ -119,7 +119,7 @@ rm -fr html/.doctrees html/.buildinfo
 * Wed Apr 29 2015 Jakub Ruzicka <jruzicka@redhat.com> 1.0.3-2
 - Give up nuking pbr
 - Add the ability to set and unset flavor properties
-- Use %license
+- Use % license
 
 * Tue Mar 31 2015 Jakub Ruzicka <jruzicka@redhat.com> 1.0.3-1
 - Update to upstream 1.0.3
@@ -152,7 +152,7 @@ rm -fr html/.doctrees html/.buildinfo
 
 * Tue Nov 19 2013 Jakub Ruzicka <jruzicka@redhat.com> 0.2.2-2
 - doc subpackage now requires main package
-- Use %{__python2} macro instead of %{__python}
+- Use % {__python2} macro instead of % {__python}
 
 * Wed Oct 30 2013 Jakub Ruzicka <jruzicka@redhat.com> 0.2.2-1
 - Initial package version based on cinderclient
