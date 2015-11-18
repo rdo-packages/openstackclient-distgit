@@ -55,7 +55,7 @@ It is a thin wrapper to the stock python-*client modules that implement the
 actual REST API client actions.
 
 %package doc
-Summary:          Documentation for OpenStack Nova API Client
+Summary:          Documentation for OpenStack Command-line Client
 
 BuildRequires:    python-sphinx
 
