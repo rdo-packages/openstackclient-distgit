@@ -35,6 +35,7 @@ Requires:         python-babel
 Requires:         python-cliff
 Requires:         python-cliff-tablib
 Requires:         python-crypto
+Requires:         python-openstacksdk
 Requires:         python-oslo-config
 Requires:         python-oslo-i18n
 Requires:         python-oslo-utils
