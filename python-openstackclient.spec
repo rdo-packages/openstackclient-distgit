@@ -1,5 +1,5 @@
 Name:             python-openstackclient
-Version:          1.7.1
+Version:          1.7.2
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -103,6 +103,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Wed Jan 27 2016 Alan Pevec <alan.pevec@redhat.com> 1.7.2-1
+- Update to 1.7.2
+
 * Fri Oct 02 2015 Haikel Guemar <hguemar@fedoraproject.org> 1.7.1-1
 - Update to upstream 1.7.1
 
