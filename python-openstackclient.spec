@@ -1,7 +1,7 @@
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 Name:             python-openstackclient
 Version:          2.3.1
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
@@ -34,7 +34,6 @@ BuildRequires:    python-os-client-config
 Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
-Requires:         python-cliff-tablib
 Requires:         python-crypto
 Requires:         python-openstacksdk
 Requires:         python-oslo-config
@@ -105,6 +104,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Tue Jun 06 2017 Alfredo Moralejo <amoralej@redhat.com> 2.3.1-2
+- Removed dependency on python-cliff-tablib (rhbz#1323001)
+
 * Thu Apr 06 2017 Alan Pevec <alan.pevec@redhat.com> 2.3.1-1
 - Update to 2.3.1
 
