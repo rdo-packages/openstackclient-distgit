@@ -33,7 +33,6 @@ BuildRequires:    python-os-client-config
 Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
-Requires:         python-cliff-tablib
 Requires:         python-crypto
 Requires:         python-openstacksdk
 Requires:         python-oslo-config
