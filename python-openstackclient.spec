@@ -29,6 +29,8 @@ BuildRequires:    python-neutronclient
 BuildRequires:    python-mock
 BuildRequires:    python-requests-mock
 BuildRequires:    python-os-client-config
+# Required to compile translation files
+BuildRequires:    python-babel
 
 Requires:         python-pbr
 Requires:         python-babel
@@ -78,6 +80,9 @@ rm -rf requirements.txt test-requirements.txt
 %build
 %{__python2} setup.py build
 
+# Generate i18n iles
+%{__python2} setup.py compile_catalog -d build/lib/openstackclient/locale
+
 %install
 %{__python2} setup.py install -O1 --skip-build --root %{buildroot}
 
@@ -90,7 +95,16 @@ install -p -D -m 644 man/openstack.1 %{buildroot}%{_mandir}/man1/openstack.1
 # Fix hidden-file-or-dir warnings
 rm -fr html/.doctrees html/.buildinfo
 
-%files
+# Install i18n .mo files (.po and .pot are not required)
+install -d -m 755 %{buildroot}%{_datadir}
+rm -f %{buildroot}%{python2_sitelib}/openstackclient/locale/*/LC_*/openstackclient*po
+rm -f %{buildroot}%{python2_sitelib}/openstackclient/locale/*pot
+mv %{buildroot}%{python2_sitelib}/openstackclient/locale %{buildroot}%{_datadir}/locale
+
+# Find language files
+%find_lang openstackclient --all-name
+
+%files -f openstackclient.lang
 %license LICENSE
 %doc README.rst
 %{_bindir}/openstack
