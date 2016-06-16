@@ -50,6 +50,7 @@ Requires:         python-six >= 1.9.0
 Requires:         python-requests >= 2.5.2
 Requires:         python-stevedore
 Requires:         python-os-client-config
+Requires:         python-osc-lib
 
 %description
 python-openstackclient is a unified command-line client for the OpenStack APIs.
