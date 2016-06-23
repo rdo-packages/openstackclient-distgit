@@ -71,7 +71,6 @@ actual REST API client actions.
 
 This package contains auto-generated documentation.
 
-
 %prep
 %setup -q -n %{name}-%{upstream_version}
 
