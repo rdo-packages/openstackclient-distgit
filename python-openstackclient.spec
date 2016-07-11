@@ -72,7 +72,7 @@ actual REST API client actions.
 This package contains auto-generated documentation.
 
 %prep
-%setup -q -n %{name}-%{upstream_version}
+%autosetup -n %{name}-%{upstream_version} -S git
 
 # We handle requirements ourselves, pkg_resources only bring pain
 rm -rf requirements.txt test-requirements.txt
