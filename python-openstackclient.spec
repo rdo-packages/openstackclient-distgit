@@ -7,6 +7,8 @@ License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
+Patch0001:        0001-Revert-Rework-clientmanager.patch
+
 BuildArch:        noarch
 
 BuildRequires:    python2-devel
