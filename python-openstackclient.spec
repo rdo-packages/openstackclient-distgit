@@ -31,6 +31,16 @@ BuildRequires:    python-requests-mock
 BuildRequires:    python-os-client-config
 # Required to compile translation files
 BuildRequires:    python-babel
+# Required for unit tests
+BuildRequires:    python-os-testr
+BuildRequires:    python2-osc-lib-tests
+BuildRequires:    python-coverage
+BuildRequires:    python-fixtures
+BuildRequires:    python-oslotest
+BuildRequires:    python-reno
+BuildRequires:    python-requestsexceptions
+BuildRequires:    openstack-tempest
+BuildRequires:    python-osprofiler
 
 Requires:         python-pbr
 Requires:         python-babel
@@ -103,6 +113,9 @@ mv %{buildroot}%{python2_sitelib}/openstackclient/locale %{buildroot}%{_datadir}
 
 # Find language files
 %find_lang openstackclient --all-name
+
+%check
+%{__python2} setup.py test
 
 %files -f openstackclient.lang
 %license LICENSE
