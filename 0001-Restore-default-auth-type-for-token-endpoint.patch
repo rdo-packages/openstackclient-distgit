@@ -1,0 +1,35 @@
+From 188709c6688b6baa0b9e3c09f4dda745ab1e700e Mon Sep 17 00:00:00 2001
+From: Dean Troyer <dtroyer@gmail.com>
+Date: Wed, 24 Aug 2016 15:26:39 -0500
+Subject: [PATCH] Restore default auth-type for token/endpoint
+
+The split to osc-lib shell lost the detection of --os-token and
+--os-url to set --os-auth-type token_endpoint
+
+Closes-bug: 1615988
+Change-Id: I248f776a3a7b276195c162818f41ba20760ee545
+---
+ openstackclient/shell.py | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/openstackclient/shell.py b/openstackclient/shell.py
+index 67c5199..da58b63 100644
+--- a/openstackclient/shell.py
++++ b/openstackclient/shell.py
+@@ -61,8 +61,12 @@ class OpenStackShell(shell.OpenStackShell):
+     def _final_defaults(self):
+         super(OpenStackShell, self)._final_defaults()
+ 
+-        # Set default auth type to password
+-        self._auth_type = 'password'
++        # Set the default plugin to token_endpoint if url and token are given
++        if (self.options.url and self.options.token):
++            # Use service token authentication
++            self._auth_type = 'token_endpoint'
++        else:
++            self._auth_type = 'password'
+ 
+     def _load_plugins(self):
+         """Load plugins via stevedore
+-- 
+1.9.1

@@ -7,6 +7,9 @@ License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
 
+# Test https://review.openstack.org/#/c/360100/ to fix https://launchpad.net/bugs/1615988
+Patch0001: 0001-Restore-default-auth-type-for-token-endpoint.patch
+
 BuildArch:        noarch
 
 BuildRequires:    python2-devel
