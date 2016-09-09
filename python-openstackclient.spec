@@ -39,7 +39,7 @@ BuildRequires:    python-fixtures
 BuildRequires:    python-oslotest
 BuildRequires:    python-reno
 BuildRequires:    python-requestsexceptions
-BuildRequires:    openstack-tempest
+BuildRequires:    python-openstacksdk
 BuildRequires:    python-osprofiler
 
 Requires:         python-pbr
