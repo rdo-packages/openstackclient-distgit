@@ -5,7 +5,7 @@ Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
-Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}.tar.gz
+Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
 
 BuildArch:        noarch
 
