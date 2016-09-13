@@ -1,7 +1,7 @@
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 Name:             python-openstackclient
-Version:          XXX
-Release:          XXX
+Version:          3.2.0
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
@@ -131,3 +131,6 @@ mv %{buildroot}%{python2_sitelib}/openstackclient/locale %{buildroot}%{_datadir}
 %doc html
 
 %changelog
+* Tue Sep 13 2016 Haikel Guemar <hguemar@fedoraproject.org> 3.2.0-1
+- Update to 3.2.0
+
