@@ -1,3 +1,4 @@
+%{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 Name:             python-openstackclient
 Version:          XXX
 Release:          XXX
@@ -5,7 +6,7 @@ Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
-Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{version}.tar.gz
+Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
 
 BuildArch:        noarch
 
