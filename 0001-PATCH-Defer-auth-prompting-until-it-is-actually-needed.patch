@@ -1,0 +1,191 @@
+From a2cd3a7e29955bac69cf4492a3d159bff8db598d Mon Sep 17 00:00:00 2001
+From: Dean Troyer <dtroyer@gmail.com>
+Date: Thu, 1 Sep 2016 10:54:29 -0500
+Subject: [PATCH] Defer auth prompting until it is actually needed
+
+Auth option prompting happens waaaay to early in the default
+os-client-config flow, we need to defer it until adter the commands
+have been parsed.  This is why ClientManager.setup_auth() exists,
+as it is not called until the first attempt to connect to a server
+occurs.  Commands that do not require authentication never hit this.
+
+Also, required options were not being enforced.  By doing this we handle
+when no authentication info is present, we fail on missing auth-url rather
+than attempt to prompt for a password (default auth is password).
+
+Closes-Bug: 1619274
+Change-Id: Ia4eae350e6904c9eb2c8507d9b3429fe52418726
+(cherry picked from commit 14dbfe44741b65c9e0514a34669f52de8629b1c0)
+---
+ openstackclient/common/client_config.py | 28 +++++++++++++++++++++++++
+ openstackclient/common/clientmanager.py | 20 ++++++++++++++++++
+ openstackclient/shell.py                | 36 ++++++++++++++++++++++++++++++---
+ 3 files changed, 81 insertions(+), 3 deletions(-)
+
+diff --git a/openstackclient/common/client_config.py b/openstackclient/common/client_config.py
+index 895909e..30286df 100644
+--- a/openstackclient/common/client_config.py
++++ b/openstackclient/common/client_config.py
+@@ -16,6 +16,7 @@
+ import logging
+
+ from os_client_config import config
++from os_client_config import exceptions as occ_exceptions
+
+
+ LOG = logging.getLogger(__name__)
+@@ -182,6 +183,14 @@ class OSC_Config(config.OpenStackConfig):
+         LOG.debug("auth_config_hook(): %s" % config)
+         return config
+
++    def load_auth_plugin(self, config):
++        """Get auth plugin and validate args"""
++
++        loader = self._get_auth_loader(config)
++        config = self._validate_auth(config, loader)
++        auth_plugin = loader.load_from_options(**config['auth'])
++        return auth_plugin
++
+     def _validate_auth_ksc(self, config, cloud, fixed_argparse=None):
+         """Old compatibility hack for OSC, no longer needed/wanted"""
+         return config
+@@ -192,6 +201,8 @@ class OSC_Config(config.OpenStackConfig):
+
+         plugin_options = loader.get_options()
+
++        msgs = []
++        prompt_options = []
+         for p_opt in plugin_options:
+             # if it's in config, win, move it and kill it from config dict
+             # if it's in config.auth but not in config we're good
+@@ -202,6 +213,16 @@ class OSC_Config(config.OpenStackConfig):
+                 winning_value = self._find_winning_auth_value(
+                     p_opt, config['auth'])
+
++            # if the plugin tells us that this value is required
++            # then error if it's doesn't exist now
++            if not winning_value and p_opt.required:
++                msgs.append(
++                    'Missing value {auth_key}'
++                    ' required for auth plugin {plugin}'.format(
++                        auth_key=p_opt.name, plugin=config.get('auth_type'),
++                    )
++                )
++
+             # Clean up after ourselves
+             for opt in [p_opt.name] + [o.name for o in p_opt.deprecated]:
+                 opt = opt.replace('-', '_')
+@@ -224,6 +245,13 @@ class OSC_Config(config.OpenStackConfig):
+                     p_opt.dest not in config['auth'] and
+                     self._pw_callback is not None
+             ):
++                # Defer these until we know all required opts are present
++                prompt_options.append(p_opt)
++
++        if msgs:
++            raise occ_exceptions.OpenStackConfigException('\n'.join(msgs))
++        else:
++            for p_opt in prompt_options:
+                 config['auth'][p_opt.dest] = self._pw_callback(p_opt.prompt)
+
+         return config
+diff --git a/openstackclient/common/clientmanager.py b/openstackclient/common/clientmanager.py
+index 57423ae..23c35a3 100644
+--- a/openstackclient/common/clientmanager.py
++++ b/openstackclient/common/clientmanager.py
+@@ -60,6 +60,26 @@ class ClientManager(clientmanager.ClientManager):
+         self._cacert = self.cacert
+         self._insecure = not self.verify
+
++    def setup_auth(self):
++        """Set up authentication"""
++
++        if self._auth_setup_completed:
++            return
++
++        # NOTE(dtroyer): Validate the auth args; this is protected with 'if'
++        #                because openstack_config is an optional argument to
++        #                CloudConfig.__init__() and we'll die if it was not
++        #                passed.
++        if self._cli_options._openstack_config is not None:
++            self._cli_options._openstack_config._pw_callback = \
++                shell.prompt_for_password
++            self._cli_options._auth = \
++                self._cli_options._openstack_config.load_auth_plugin(
++                    self._cli_options.config,
++                )
++
++        return super(ClientManager, self).setup_auth()
++
+     def is_network_endpoint_enabled(self):
+         """Check if the network endpoint is enabled"""
+
+diff --git a/openstackclient/shell.py b/openstackclient/shell.py
+index 26147be..3971b6e 100644
+--- a/openstackclient/shell.py
++++ b/openstackclient/shell.py
+@@ -140,12 +140,11 @@ class OpenStackShell(shell.OpenStackShell):
+         # First, throw away what has already been done with o-c-c and
+         # use our own.
+         try:
+-            cc = cloud_config.OSC_Config(
++            self.cloud_config = cloud_config.OSC_Config(
+                 override_defaults={
+                     'interface': None,
+                     'auth_type': self._auth_type,
+                 },
+-                pw_func=shell.prompt_for_password,
+             )
+         except (IOError, OSError) as e:
+             self.log.critical("Could not read clouds.yaml configuration file")
+@@ -154,9 +153,13 @@ class OpenStackShell(shell.OpenStackShell):
+
+         if not self.options.debug:
+             self.options.debug = None
+-        self.cloud = cc.get_one_cloud(
++
++        # NOTE(dtroyer): Need to do this with validate=False to defer the
++        #                auth plugin handling to ClientManager.setup_auth()
++        self.cloud = self.cloud_config.get_one_cloud(
+             cloud=self.options.cloud,
+             argparse=self.options,
++            validate=False,
+         )
+
+         # Then, re-create the client_manager with the correct arguments
+@@ -165,6 +168,33 @@ class OpenStackShell(shell.OpenStackShell):
+             api_version=self.api_version,
+         )
+
++    def prepare_to_run_command(self, cmd):
++        """Set up auth and API versions"""
++
++        # TODO(dtroyer): Move this to osc-lib
++        # NOTE(dtroyer): If auth is not required for a command, force fake
++        #                token auth so KSA plugins are happy
++
++        kwargs = {}
++        if not cmd.auth_required:
++            # Build fake token creds to keep ksa and o-c-c hushed
++            kwargs['auth_type'] = 'token_endpoint'
++            kwargs['auth'] = {}
++            kwargs['auth']['token'] = 'x'
++            kwargs['auth']['url'] = 'x'
++
++        # Validate auth options
++        self.cloud = self.cloud_config.get_one_cloud(
++            cloud=self.options.cloud,
++            argparse=self.options,
++            validate=True,
++            **kwargs
++        )
++        # Push the updated args into ClientManager
++        self.client_manager._cli_options = self.cloud
++
++        return super(OpenStackShell, self).prepare_to_run_command(cmd)
++
+
+ def main(argv=None):
+     if argv is None:
+--
+1.9.1
