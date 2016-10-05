@@ -131,3 +131,4 @@ mv %{buildroot}%{python2_sitelib}/openstackclient/locale %{buildroot}%{_datadir}
 %doc html
 
 %changelog
+# REMOVEME: error caused by commit http://git.openstack.org/cgit/openstack/python-openstackclient/commit/?id=ea7f28fb4acd39345bb95809a952e03ed802a9ff
