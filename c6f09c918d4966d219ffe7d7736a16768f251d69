@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5adbc538_d7571101",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2016-11-29T15:56:36Z",
+      "side": 1,
+      "message": "Missing locale cleanup in python3_sitelib. Example in  https://github.com/rdo-packages/oslo-db-distgit/blob/rpm-master/python-oslo-db.spec#L174-L176",
+      "revId": "c6f09c918d4966d219ffe7d7736a16768f251d69",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5adbc538_b7528511",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 3
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2016-11-29T15:56:36Z",
+      "side": 1,
+      "message": "Convention for translation files for packages providing both python2 and python3 has been to create a separated -lang package and make python2 and python2 depend on it.\n\nSee https://review.rdoproject.org/r/#/c/1451/2/python-oslo-log.spec",
+      "range": {
+        "startLine": 216,
+        "startChar": 28,
+        "endLine": 216,
+        "endChar": 52
+      },
+      "revId": "c6f09c918d4966d219ffe7d7736a16768f251d69",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5adbc538_974d8975",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 3
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2016-11-29T15:56:36Z",
+      "side": 1,
+      "message": "according to fedora guidelines in https://fedoraproject.org/wiki/Packaging:Python we must provide openstack-2 and openstack-%{python2_version} in python2 package.",
+      "range": {
+        "startLine": 219,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 20
+      },
+      "revId": "c6f09c918d4966d219ffe7d7736a16768f251d69",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
