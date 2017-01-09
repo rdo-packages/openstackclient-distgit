@@ -1,14 +1,12 @@
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 Name:             python-openstackclient
 Version:          3.2.0
-Release:          2%{?dist}
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
 Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
-
-Patch0001:        0001-PATCH-Defer-auth-prompting-until-it-is-actually-needed.patch
 
 BuildArch:        noarch
 
@@ -133,8 +131,6 @@ mv %{buildroot}%{python2_sitelib}/openstackclient/locale %{buildroot}%{_datadir}
 %doc html
 
 %changelog
-* Tue Oct 4 2016 David Moreau Simard <dmsimard@redhat.com> 3.2.0-2
-- Carry patch temporarily until released upstream in order to resolve authentication issues
-
 * Tue Sep 13 2016 Haikel Guemar <hguemar@fedoraproject.org> 3.2.0-1
 - Update to 3.2.0
+
