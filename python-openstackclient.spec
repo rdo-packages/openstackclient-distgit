@@ -47,21 +47,22 @@ Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
 Requires:         python-crypto
-Requires:         python-openstacksdk
+Requires:         python-openstacksdk >= 0.9.13
 Requires:         python-oslo-config
-Requires:         python-oslo-i18n
-Requires:         python-oslo-utils
+Requires:         python-oslo-i18n >= 2.1.0
+Requires:         python-oslo-utils >= 3.18.0
 Requires:         python-oslo-serialization
-Requires:         python-glanceclient
-Requires:         python-keystoneclient
-Requires:         python-novaclient
-Requires:         python-cinderclient
+Requires:         python-glanceclient >= 2.5.0
+Requires:         python-keystoneauth1 >= 2.18.0
+Requires:         python-keystoneclient >= 1:3.8.0
+Requires:         python-novaclient >= 1:6.0.0
+Requires:         python-cinderclient >= 1.6.0
 Requires:         python-neutronclient
 Requires:         python-six >= 1.9.0
 Requires:         python-requests >= 2.5.2
 Requires:         python-stevedore
 Requires:         python-os-client-config
-Requires:         python-osc-lib
+Requires:         python-osc-lib >= 1.2.0
 
 %description
 python-openstackclient is a unified command-line client for the OpenStack APIs.
