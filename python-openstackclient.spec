@@ -1,12 +1,12 @@
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 Name:             python-openstackclient
-Version:          2.3.0
+Version:          2.3.1
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
 URL:              http://github.com/openstack/%{name}
-Source0:          http://pypi.python.org/packages/source/p/%{name}/%{name}-%{version}%{?milestone}.tar.gz
+Source0:          https://pypi.io/packages/source/p/%{name}/%{name}-%{version}%{?milestone}.tar.gz
 
 BuildArch:        noarch
 
@@ -105,6 +105,9 @@ rm -fr html/.doctrees html/.buildinfo
 %doc html
 
 %changelog
+* Thu Apr 06 2017 Alan Pevec <alan.pevec@redhat.com> 2.3.1-1
+- Update to 2.3.1
+
 * Tue Sep 13 2016 Haikel Guemar <hguemar@fedoraproject.org> 2.3.0-1
 - Update to 2.3.0
 
