@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa98f980_949f3603",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 5
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2017-04-07T11:53:13Z",
+      "side": 1,
+      "message": "Missing python3-keystoneauth1?",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 40
+      },
+      "revId": "b8debc10d60541c9095e98f504a317cb112a4c25",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
