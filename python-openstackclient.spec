@@ -46,7 +46,6 @@ BuildRequires:    python-osprofiler
 Requires:         python-pbr
 Requires:         python-babel
 Requires:         python-cliff
-Requires:         python-crypto
 Requires:         python-openstacksdk >= 0.9.13
 Requires:         python-oslo-config
 Requires:         python-oslo-i18n >= 2.1.0
