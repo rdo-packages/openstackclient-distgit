@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9aa7fdbe_64b6a6de",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 7
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 127
+      },
+      "writtenOn": "2017-06-20T05:17:03Z",
+      "side": 1,
+      "message": "crypto is not directly used by osc since 2014",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 147,
+        "endChar": 32
+      },
+      "revId": "5c40388974af4567b5d94c08e207aaff2a86edf9",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
