@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9aa7fdbe_15c4223f",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 108
+      },
+      "writtenOn": "2017-06-23T11:30:40Z",
+      "side": 0,
+      "message": "huh, strange neutroncli isn\u0027t required anymore...",
+      "revId": "e330b73e4472f12525dc90c833a8bcce884c0526",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
