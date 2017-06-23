@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9aa7fdbe_d5c9ba5b",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 8
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 108
+      },
+      "writtenOn": "2017-06-23T11:28:34Z",
+      "side": 1,
+      "message": "This is equivalent to Name, why new macro? Looks unused in the new code...",
+      "revId": "689b49c3a8edf2f582edda7628f00ace08737f3b",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9aa7fdbe_b5b516cf",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 108
+      },
+      "writtenOn": "2017-06-23T11:28:34Z",
+      "side": 1,
+      "message": "This one is used the most time so I suggest naming it clearly - \"client\" or \"project\" as in rdoinfo.",
+      "revId": "689b49c3a8edf2f582edda7628f00ace08737f3b",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
