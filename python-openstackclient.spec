@@ -14,7 +14,6 @@ BuildRequires:    python2-devel
 BuildRequires:    python-setuptools
 BuildRequires:    python-pbr
 BuildRequires:    python-d2to1
-BuildRequires:    python-oslo-sphinx
 BuildRequires:    git
 BuildRequires:    python-six
 BuildRequires:    python-cliff
@@ -72,6 +71,7 @@ actual REST API client actions.
 Summary:          Documentation for OpenStack Command-line Client
 
 BuildRequires:    python-sphinx
+BuildRequires:    python-openstackdocstheme
 
 Requires:         %{name} = %{version}-%{release}
 
@@ -97,9 +97,9 @@ rm -rf requirements.txt test-requirements.txt
 %install
 %{__python2} setup.py install -O1 --skip-build --root %{buildroot}
 
-export PYTHONPATH="$( pwd ):$PYTHONPATH"
-sphinx-build -b html doc/source html
-sphinx-build -b man doc/source man
+
+%{__python2} setup.py build_sphinx -b html
+%{__python2} setup.py build_sphinx -b man
 
 install -p -D -m 644 man/openstack.1 %{buildroot}%{_mandir}/man1/openstack.1
 
