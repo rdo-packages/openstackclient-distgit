@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a890539_bb242ac7",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2017-08-11T12:49:24Z",
+      "side": 0,
+      "message": "neutronclient provides some osc plugins, as for bgpvpn, sfc, network trunks, etc... so removing this may break some deployments. Altough it\u0027s not fully required, i\u0027d leave neutronclient as Requires for backwards compatibility.",
+      "range": {
+        "startLine": 58,
+        "startChar": 25,
+        "endLine": 58,
+        "endChar": 38
+      },
+      "revId": "76910822316efa795a8a107f892b248fbdbd0268",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
