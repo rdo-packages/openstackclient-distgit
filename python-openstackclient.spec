@@ -14,7 +14,7 @@ Release:          XXX
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
-URL:              http://github.com/openstack/%{name}
+URL:              http://launchpad.net/%{name}
 Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
 
 BuildArch:        noarch
@@ -52,7 +52,6 @@ BuildRequires:    python-babel
 # Required for unit tests
 BuildRequires:    python-os-testr
 BuildRequires:    python2-osc-lib-tests
-BuildRequires:    python-coverage
 BuildRequires:    python-fixtures
 BuildRequires:    python-oslotest
 BuildRequires:    python-reno
@@ -194,7 +193,7 @@ ln -s ./openstack %{buildroot}%{_bindir}/openstack-%{python2_version}
 install -p -D -m 644 doc/build/man/openstack.1 %{buildroot}%{_mandir}/man1/openstack.1
 
 # Fix hidden-file-or-dir warnings
-rm -fr doc/build/html/.doctrees doc/build/html/.buildinfo
+rm -fr doc/build/html/.doctrees doc/build/html/.buildinfo doc/build/html/.htaccess
 
 # Install i18n .mo files (.po and .pot are not required)
 install -d -m 755 %{buildroot}%{_datadir}
