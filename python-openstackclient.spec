@@ -34,7 +34,6 @@ BuildRequires:    python-babel
 # Required for unit tests
 BuildRequires:    python-os-testr
 BuildRequires:    python2-osc-lib-tests
-BuildRequires:    python-coverage
 BuildRequires:    python-fixtures
 BuildRequires:    python-oslotest
 BuildRequires:    python-reno
