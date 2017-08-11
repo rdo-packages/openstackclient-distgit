@@ -22,6 +22,30 @@
       "revId": "76910822316efa795a8a107f892b248fbdbd0268",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a890539_5b1d0673",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2017-08-11T13:01:48Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "5a890539_bb242ac7",
+      "range": {
+        "startLine": 58,
+        "startChar": 25,
+        "endLine": 58,
+        "endChar": 38
+      },
+      "revId": "76910822316efa795a8a107f892b248fbdbd0268",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
