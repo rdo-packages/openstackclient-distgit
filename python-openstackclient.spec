@@ -8,6 +8,11 @@
 
 %global client openstackclient
 
+%global common_desc \
+python-openstackclient is a unified command-line client for the OpenStack APIs. \
+It is a thin wrapper to the stock python-*client modules that implement the \
+actual REST API client actions.
+
 Name:             python-openstackclient
 Version:          XXX
 Release:          XXX
@@ -20,9 +25,7 @@ Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_vers
 BuildArch:        noarch
 
 %description
-python-openstackclient is a unified command-line client for the OpenStack APIs.
-It is a thin wrapper to the stock python-*client modules that implement the
-actual REST API client actions.
+%{common_desc}
 
 %package -n python2-%{client}
 Summary:    OpenStack Command-line Client
@@ -77,9 +80,7 @@ Requires:         python-%{client}-lang = %{version}-%{release}
 
 
 %description -n python2-%{client}
-python-openstackclient is a unified command-line client for the OpenStack APIs.
-It is a thin wrapper to the stock python-*client modules that implement the
-actual REST API client actions.
+%{common_desc}
 
 %package -n python-%{client}-doc
 Summary:          Documentation for OpenStack Command-line Client
@@ -90,9 +91,7 @@ BuildRequires:    python-openstackdocstheme
 Requires:         %{name} = %{version}-%{release}
 
 %description -n python-%{client}-doc
-python-openstackclient is a unified command-line client for the OpenStack APIs.
-It is a thin wrapper to the stock python-*client modules that implement the
-actual REST API client actions.
+%{common_desc}
 
 This package contains auto-generated documentation.
 
@@ -156,9 +155,7 @@ Requires:         python3-osc-lib >= 1.7.0
 Requires:         python-%{client}-lang = %{version}-%{release}
 
 %description -n python3-%{client}
-python-openstackclient is a unified command-line client for the OpenStack APIs.
-It is a thin wrapper to the stock python-*client modules that implement the
-actual REST API client actions.
+%{common_desc}
 %endif
 
 %prep
