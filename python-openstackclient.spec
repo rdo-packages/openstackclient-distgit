@@ -137,6 +137,7 @@ BuildRequires:    python3-reno
 BuildRequires:    python3-requestsexceptions
 BuildRequires:    python3-openstacksdk
 BuildRequires:    python3-osprofiler
+BuildRequires:    openstack-macros
 
 Requires:         python3-pbr
 Requires:         python3-babel
@@ -162,7 +163,7 @@ Requires:         python-%{client}-lang = %{version}-%{release}
 %autosetup -n %{name}-%{upstream_version} -S git
 
 # We handle requirements ourselves, pkg_resources only bring pain
-rm -rf requirements.txt test-requirements.txt
+%py_req_cleanup
 
 %build
 %py2_build
