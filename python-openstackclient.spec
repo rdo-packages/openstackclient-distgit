@@ -167,12 +167,12 @@ Requires:         python-%{client}-lang = %{version}-%{release}
 
 %build
 %py2_build
-# Generate i18n files
-%{__python2} setup.py compile_catalog -d build/lib/openstackclient/locale
-
 %if 0%{?with_python3}
 %py3_build
 %endif
+
+# Generate i18n files
+%{__python2} setup.py compile_catalog -d build/lib/openstackclient/locale
 
 %install
 %if 0%{?with_python3}
