@@ -24,6 +24,9 @@ Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_vers
 
 BuildArch:        noarch
 
+BuildRequires:    git
+BuildRequires:    openstack-macros
+
 %description
 %{common_desc}
 
@@ -35,7 +38,6 @@ BuildRequires:    python2-devel
 BuildRequires:    python-setuptools
 BuildRequires:    python-pbr
 BuildRequires:    python-d2to1
-BuildRequires:    git
 BuildRequires:    python-six
 BuildRequires:    python-cliff
 BuildRequires:    python-oslo-i18n
@@ -137,7 +139,6 @@ BuildRequires:    python3-reno
 BuildRequires:    python3-requestsexceptions
 BuildRequires:    python3-openstacksdk
 BuildRequires:    python3-osprofiler
-BuildRequires:    openstack-macros
 
 Requires:         python3-pbr
 Requires:         python3-babel
