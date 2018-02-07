@@ -22,6 +22,30 @@
       "revId": "6991c88430ff90abf910c8b705727a73faca44e7",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9aa53dc9_5c4b0cb1",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2018-02-07T11:25:16Z",
+      "side": 0,
+      "message": "Not sure if that breaks, i removed because of https://github.com/openstack/python-openstackclient/commit/8485a52b99d895a79dca3d7d384543e847b9f381#diff-b4ef698db8ca845e5845c4618278f29a.\nBut will readd.",
+      "parentUuid": "9aa53dc9_fc59c08f",
+      "range": {
+        "startLine": 78,
+        "startChar": 25,
+        "endLine": 78,
+        "endChar": 38
+      },
+      "revId": "6991c88430ff90abf910c8b705727a73faca44e7",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
