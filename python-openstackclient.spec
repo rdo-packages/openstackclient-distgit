@@ -35,49 +35,59 @@ Summary:    OpenStack Command-line Client
 %{?python_provide:%python_provide python2-%{client}}
 
 BuildRequires:    python2-devel
-BuildRequires:    python-setuptools
-BuildRequires:    python-pbr
+BuildRequires:    python2-setuptools
+BuildRequires:    python2-pbr
+BuildRequires:    python2-six
+BuildRequires:    python2-oslo-i18n
+BuildRequires:    python2-oslo-utils
+BuildRequires:    python2-requests
+BuildRequires:    python2-glanceclient
+BuildRequires:    python2-keystoneclient
+BuildRequires:    python2-novaclient
+BuildRequires:    python2-cinderclient
+BuildRequires:    python2-mock
+BuildRequires:    python2-os-client-config
+%if 0%{?fedora} > 0
+BuildRequires:    python2-d2to1
+BuildRequires:    python2-cliff
+BuildRequires:    python2-simplejson
+BuildRequires:    python2-requests-mock
+%else
 BuildRequires:    python-d2to1
-BuildRequires:    python-six
 BuildRequires:    python-cliff
-BuildRequires:    python-oslo-i18n
-BuildRequires:    python-oslo-utils
 BuildRequires:    python-simplejson
-BuildRequires:    python-requests
-BuildRequires:    python-glanceclient
-BuildRequires:    python-keystoneclient
-BuildRequires:    python-novaclient
-BuildRequires:    python-cinderclient
-BuildRequires:    python-neutronclient
-BuildRequires:    python-mock
 BuildRequires:    python-requests-mock
-BuildRequires:    python-os-client-config
+%endif
 # Required to compile translation files
-BuildRequires:    python-babel
+BuildRequires:    python2-babel
 # Required for unit tests
-BuildRequires:    python-os-testr
+BuildRequires:    python2-os-testr
 BuildRequires:    python2-osc-lib-tests
-BuildRequires:    python-fixtures
-BuildRequires:    python-oslotest
-BuildRequires:    python-reno
-BuildRequires:    python-requestsexceptions
-BuildRequires:    python-openstacksdk
-BuildRequires:    python-osprofiler
+BuildRequires:    python2-fixtures
+BuildRequires:    python2-oslotest
+BuildRequires:    python2-reno
+BuildRequires:    python2-requestsexceptions
+BuildRequires:    python2-openstacksdk
+BuildRequires:    python2-osprofiler
 
-Requires:         python-pbr
-Requires:         python-babel
+Requires:         python2-pbr
+Requires:         python2-babel
+Requires:         python2-openstacksdk >= 0.9.19
+Requires:         python2-oslo-i18n >= 3.15.3
+Requires:         python2-oslo-utils >= 3.33.0
+Requires:         python2-glanceclient >= 1:2.8.0
+Requires:         python2-keystoneauth1 >= 3.3.0
+Requires:         python2-keystoneclient >= 1:3.8.0
+Requires:         python2-novaclient >= 9.1.0
+Requires:         python2-cinderclient >= 3.3.0
+Requires:         python2-neutronclient >= 6.7.0
+Requires:         python2-six >= 1.10.0
+Requires:         python2-osc-lib >= 1.8.0
+%if 0%{?fedora} > 0
+Requires:         python2-cliff
+%else
 Requires:         python-cliff
-Requires:         python-openstacksdk >= 0.9.17
-Requires:         python-oslo-i18n >= 2.1.0
-Requires:         python-oslo-utils >= 3.20.0
-Requires:         python-glanceclient >= 1:2.8.0
-Requires:         python-keystoneauth1 >= 3.1.0
-Requires:         python-keystoneclient >= 1:3.8.0
-Requires:         python-novaclient >= 1:9.0.0
-Requires:         python-cinderclient >= 3.1.0
-Requires:         python-neutronclient >= 6.3.0
-Requires:         python-six >= 1.9.0
-Requires:         python-osc-lib >= 1.7.0
+%endif
 Requires:         python-%{client}-lang = %{version}-%{release}
 
 
@@ -87,8 +97,8 @@ Requires:         python-%{client}-lang = %{version}-%{release}
 %package -n python-%{client}-doc
 Summary:          Documentation for OpenStack Command-line Client
 
-BuildRequires:    python-sphinx
-BuildRequires:    python-openstackdocstheme
+BuildRequires:    python2-sphinx
+BuildRequires:    python2-openstackdocstheme
 
 Requires:         %{name} = %{version}-%{release}
 
@@ -123,7 +133,6 @@ BuildRequires:    python3-glanceclient
 BuildRequires:    python3-keystoneclient
 BuildRequires:    python3-novaclient
 BuildRequires:    python3-cinderclient
-BuildRequires:    python3-neutronclient
 BuildRequires:    python3-mock
 BuildRequires:    python3-requests-mock
 BuildRequires:    python3-os-client-config
@@ -143,17 +152,17 @@ BuildRequires:    python3-osprofiler
 Requires:         python3-pbr
 Requires:         python3-babel
 Requires:         python3-cliff
-Requires:         python3-openstacksdk >= 0.9.17
-Requires:         python3-oslo-i18n >= 2.1.0
-Requires:         python3-oslo-utils >= 3.20.0
+Requires:         python3-openstacksdk >= 0.9.19
+Requires:         python3-oslo-i18n >= 3.15.3
+Requires:         python3-oslo-utils >= 3.33.0
 Requires:         python3-glanceclient >= 1:2.8.0
-Requires:         python3-keystoneauth1 >= 3.1.0
+Requires:         python3-keystoneauth1 >= 3.3.0
 Requires:         python3-keystoneclient >= 1:3.8.0
-Requires:         python3-novaclient >= 1:9.0.0
-Requires:         python3-cinderclient >= 3.1.
-Requires:         python3-neutronclient >= 6.3.0
-Requires:         python3-six >= 1.9.0
-Requires:         python3-osc-lib >= 1.7.0
+Requires:         python3-novaclient >= 9.1.0
+Requires:         python3-cinderclient >= 3.3.0
+Requires:         python3-neutronclient >= 6.7.0
+Requires:         python3-six >= 1.10.0
+Requires:         python3-osc-lib >= 1.8.0
 Requires:         python-%{client}-lang = %{version}-%{release}
 
 %description -n python3-%{client}
