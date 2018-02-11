@@ -14,8 +14,8 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-openstackclient
-Version:          XXX
-Release:          XXX
+Version:          3.14.0
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
@@ -250,3 +250,6 @@ rm -rf .testrepository
 %{python3_sitelib}/*.egg-info
 %endif
 %changelog
+* Sun Feb 11 2018 RDO <dev@lists.rdoproject.org> 3.14.0-1
+- Update to 3.14.0
+
