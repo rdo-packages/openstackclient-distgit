@@ -1,6 +1,6 @@
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 Name:             python-openstackclient
-Version:          3.8.1
+Version:          3.8.2
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -132,6 +132,9 @@ mv %{buildroot}%{python2_sitelib}/openstackclient/locale %{buildroot}%{_datadir}
 %doc html
 
 %changelog
+* Thu Apr 19 2018 RDO <dev@lists.rdoproject.org> 3.8.2-1
+- Update to 3.8.2
+
 * Wed Feb 08 2017 Alfredo Moralejo <amoralej@redhat.com> 3.8.1-1
 - Update to 3.8.1
 
