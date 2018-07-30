@@ -99,6 +99,7 @@ Summary:          Documentation for OpenStack Command-line Client
 
 BuildRequires:    python2-sphinx
 BuildRequires:    python2-openstackdocstheme
+BuildRequires:    python2-sphinxcontrib-apidoc
 
 Requires:         %{name} = %{version}-%{release}
 
@@ -195,9 +196,8 @@ ln -s ./openstack-%{python3_version} %{buildroot}%{_bindir}/openstack-3
 ln -s ./openstack %{buildroot}%{_bindir}/openstack-2
 ln -s ./openstack %{buildroot}%{_bindir}/openstack-%{python2_version}
 
-%{__python2} setup.py build_sphinx -b html
-%{__python2} setup.py build_sphinx -b man
-
+sphinx-build -b html doc/source doc/build/html
+sphinx-build -b man doc/source doc/build/man
 install -p -D -m 644 doc/build/man/openstack.1 %{buildroot}%{_mandir}/man1/openstack.1
 
 # Fix hidden-file-or-dir warnings
