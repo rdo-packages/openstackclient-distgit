@@ -72,17 +72,17 @@ BuildRequires:    python2-osprofiler
 
 Requires:         python2-pbr
 Requires:         python2-babel
-Requires:         python2-openstacksdk >= 0.9.19
+Requires:         python2-openstacksdk >= 0.11.2
 Requires:         python2-oslo-i18n >= 3.15.3
 Requires:         python2-oslo-utils >= 3.33.0
 Requires:         python2-glanceclient >= 1:2.8.0
-Requires:         python2-keystoneauth1 >= 3.3.0
-Requires:         python2-keystoneclient >= 1:3.8.0
+Requires:         python2-keystoneauth1 >= 3.4.0
+Requires:         python2-keystoneclient >= 1:3.17.0
 Requires:         python2-novaclient >= 9.1.0
 Requires:         python2-cinderclient >= 3.3.0
 Requires:         python2-neutronclient >= 6.7.0
 Requires:         python2-six >= 1.10.0
-Requires:         python2-osc-lib >= 1.8.0
+Requires:         python2-osc-lib >= 1.10.0
 %if 0%{?fedora} > 0
 Requires:         python2-cliff
 %else
@@ -153,17 +153,17 @@ BuildRequires:    python3-osprofiler
 Requires:         python3-pbr
 Requires:         python3-babel
 Requires:         python3-cliff
-Requires:         python3-openstacksdk >= 0.9.19
+Requires:         python3-openstacksdk >= 0.11.2
 Requires:         python3-oslo-i18n >= 3.15.3
 Requires:         python3-oslo-utils >= 3.33.0
 Requires:         python3-glanceclient >= 1:2.8.0
-Requires:         python3-keystoneauth1 >= 3.3.0
-Requires:         python3-keystoneclient >= 1:3.8.0
+Requires:         python3-keystoneauth1 >= 3.4.0
+Requires:         python3-keystoneclient >= 1:3.17.0
 Requires:         python3-novaclient >= 9.1.0
 Requires:         python3-cinderclient >= 3.3.0
 Requires:         python3-neutronclient >= 6.7.0
 Requires:         python3-six >= 1.10.0
-Requires:         python3-osc-lib >= 1.8.0
+Requires:         python3-osc-lib >= 1.10.0
 Requires:         python-%{client}-lang = %{version}-%{release}
 
 %description -n python3-%{client}
