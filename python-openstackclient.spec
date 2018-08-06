@@ -250,3 +250,4 @@ rm -rf .testrepository
 %{python3_sitelib}/*.egg-info
 %endif
 %changelog
+# REMOVEME: error caused by commit http://git.openstack.org/cgit/openstack/python-openstackclient/commit/?id=2b62b6e6ecb5fbb6d3078a3f7737364e13ec4e6c
