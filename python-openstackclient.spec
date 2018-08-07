@@ -7,6 +7,7 @@
 %endif
 
 %global client openstackclient
+%global with_doc 1
 
 %global common_desc \
 python-openstackclient is a unified command-line client for the OpenStack APIs. \
@@ -94,6 +95,7 @@ Requires:         python-%{client}-lang = %{version}-%{release}
 %description -n python2-%{client}
 %{common_desc}
 
+%if 0%{?with_doc}
 %package -n python-%{client}-doc
 Summary:          Documentation for OpenStack Command-line Client
 
@@ -107,6 +109,7 @@ Requires:         %{name} = %{version}-%{release}
 %{common_desc}
 
 This package contains auto-generated documentation.
+%endif
 
 %package  -n python-%{client}-lang
 Summary:   Translation files for Openstackclient
@@ -196,12 +199,14 @@ ln -s ./openstack-%{python3_version} %{buildroot}%{_bindir}/openstack-3
 ln -s ./openstack %{buildroot}%{_bindir}/openstack-2
 ln -s ./openstack %{buildroot}%{_bindir}/openstack-%{python2_version}
 
+%if 0%{?with_doc}
 sphinx-build -b html doc/source doc/build/html
 sphinx-build -b man doc/source doc/build/man
 install -p -D -m 644 doc/build/man/openstack.1 %{buildroot}%{_mandir}/man1/openstack.1
 
 # Fix hidden-file-or-dir warnings
 rm -fr doc/build/html/.doctrees doc/build/html/.buildinfo doc/build/html/.htaccess
+%endif
 
 # Install i18n .mo files (.po and .pot are not required)
 install -d -m 755 %{buildroot}%{_datadir}
@@ -231,11 +236,13 @@ rm -rf .testrepository
 %{_bindir}/openstack-%{python2_version}
 %{python2_sitelib}/openstackclient
 %{python2_sitelib}/*.egg-info
+%if 0%{?with_doc}
 %{_mandir}/man1/openstack.1*
 
 %files -n python-%{client}-doc
 %license LICENSE
 %doc doc/build/html
+%endif
 
 %files -n python-%{client}-lang -f openstackclient.lang
 %license LICENSE
