@@ -16,6 +16,24 @@
       "revId": "bb75b67242fe98c12f4d8d60aee8e0a3a5e2be48",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_a58640d9",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 517
+      },
+      "writtenOn": "2018-10-24T11:51:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9abe1de1_4521a4fa",
+      "revId": "bb75b67242fe98c12f4d8d60aee8e0a3a5e2be48",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
