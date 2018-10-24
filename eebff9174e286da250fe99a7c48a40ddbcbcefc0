@@ -1,0 +1,187 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9abe1de1_c541340d",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "Add line:\n\n%global __python %{__python3}",
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_a544001b",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "Add:\n\n%global __python %{__python2}",
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_05384c9f",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "You can use %{pyver_bin} here.",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 19
+      },
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_854c5c43",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "Remove this line.",
+      "range": {
+        "startLine": 148,
+        "startChar": 0,
+        "endLine": 148,
+        "endChar": 73
+      },
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_255110d9",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "This should be:\n\nmv %{buildroot}%{_bindir}/%{cname} %{buildroot}%{_bindir}/%{cname}-%{python_version}\nln -s %{cname}-%{python_version} %{buildroot}%{_bindir}/%{cname}-%{pyver}\nln -s %{cname}-%{pyver} %{buildroot}%{_bindir}/%{cname}",
+      "range": {
+        "startLine": 145,
+        "startChar": 0,
+        "endLine": 150,
+        "endChar": 74
+      },
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_456d2497",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "-%{pyver}",
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_2568f086",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_e53af897",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "I\u0027d use %{pyver_bin} or even %{__python} if you add it to the conditional to fix the links.",
+      "range": {
+        "startLine": 171,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 19
+      },
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_656ee897",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:16:56Z",
+      "side": 1,
+      "message": "%{python_version}",
+      "range": {
+        "startLine": 178,
+        "startChar": 20,
+        "endLine": 178,
+        "endChar": 45
+      },
+      "revId": "eebff9174e286da250fe99a7c48a40ddbcbcefc0",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
