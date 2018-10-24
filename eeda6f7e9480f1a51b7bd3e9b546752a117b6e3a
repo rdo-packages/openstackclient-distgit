@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9abe1de1_05904c42",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:55:37Z",
+      "side": 1,
+      "message": "I\u0027m seeing errors when building doc:\n\n2018-10-24 09:44:14.200939 | rdo-fedora-28 | 2018-10-24 09:44:14,175 INFO:dlrn-build-mock:DEBUG: BUILDSTDERR: ModuleNotFoundError: No module named \u0027openstackclient\u0027\n\nCould you add following line before sphinx-build?\n\nexport PYTHONPATH\u003d.",
+      "revId": "eeda6f7e9480f1a51b7bd3e9b546752a117b6e3a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_6578282c",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:55:37Z",
+      "side": 1,
+      "message": "%",
+      "range": {
+        "startLine": 162,
+        "startChar": 58,
+        "endLine": 162,
+        "endChar": 59
+      },
+      "revId": "eeda6f7e9480f1a51b7bd3e9b546752a117b6e3a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9abe1de1_857d7c1e",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 3
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2018-10-24T09:55:37Z",
+      "side": 1,
+      "message": "%",
+      "range": {
+        "startLine": 168,
+        "startChar": 11,
+        "endLine": 168,
+        "endChar": 12
+      },
+      "revId": "eeda6f7e9480f1a51b7bd3e9b546752a117b6e3a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
