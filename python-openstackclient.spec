@@ -139,9 +139,9 @@ Translation files for Openstackclient
 
 %install
 %{pyver_install}
-mv %{buildroot}%{_bindir}/%{cname} %{buildroot}%{_bindir}/%{cname}-%{python_version}
-ln -s %{cname}-%{python_version} %{buildroot}%{_bindir}/%{cname}-%{pyver}
-ln -s %{cname}-%{pyver} %{buildroot}%{_bindir}/%{cname}
+
+# Create a versioned binary for backwards compatibility until everything is pure py3
+ln -s %{cname} %{buildroot}%{_bindir}/%{cname}-%{pyver}
 
 %if 0%{?with_doc}
 export PYTHONPATH=.
@@ -172,7 +172,6 @@ export PYTHON=%{__python}
 %doc README.rst
 %{_bindir}/%{cname}
 %{_bindir}/%{cname}-%{pyver}
-%{_bindir}/%{cname}-%{python_version}
 %{pyver_sitelib}/%{sname}
 %{pyver_sitelib}/*.egg-info
 %if 0%{?with_doc}
