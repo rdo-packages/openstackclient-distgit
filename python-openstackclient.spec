@@ -1,10 +1,8 @@
 # Macros for py2/py3 compatibility
 %if 0%{?fedora} || 0%{?rhel} > 7
 %global pyver %{python3_pkgversion}
-%global __python %{__python3}
 %else
 %global pyver 2
-%global __python %{__python2}
 %endif
 %global pyver_bin python%{pyver}
 %global pyver_sitelib %python%{pyver}_sitelib
@@ -139,9 +137,9 @@ Translation files for Openstackclient
 
 %install
 %{pyver_install}
-mv %{buildroot}%{_bindir}/%{cname} %{buildroot}%{_bindir}/%{cname}-%{python_version}
-ln -s %{cname}-%{python_version} %{buildroot}%{_bindir}/%{cname}-%{pyver}
-ln -s %{cname}-%{pyver} %{buildroot}%{_bindir}/%{cname}
+
+# Create a versioned binary for backwards compatibility until everything is pure py3
+ln -s %{cname} %{buildroot}%{_bindir}/%{cname}-%{pyver}
 
 %if 0%{?with_doc}
 export PYTHONPATH=.
