@@ -2,9 +2,11 @@
 %if 0%{?fedora} || 0%{?rhel} > 7
 %global pyver %{python3_pkgversion}
 %global __python %{__python3}
+%global python_flavor python3
 %else
 %global pyver 2
 %global __python %{__python2}
+%global python_flavor python2
 %endif
 %global pyver_bin python%{pyver}
 %global pyver_sitelib %python%{pyver}_sitelib
