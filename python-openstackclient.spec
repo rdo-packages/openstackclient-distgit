@@ -46,6 +46,9 @@ BuildRequires:    openstack-macros
 %package -n python%{pyver}-%{sname}
 Summary:    OpenStack Command-line Client
 %{?python_provide:%python_provide python%{pyver}-%{sname}}
+%if %{pyver} == 3
+Obsoletes: python2-%{sname} < %{version}-%{release}
+%endif
 
 BuildRequires:    python%{pyver}-devel
 BuildRequires:    python%{pyver}-setuptools
