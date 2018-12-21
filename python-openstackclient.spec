@@ -189,3 +189,4 @@ export PYTHON=%{__python}
 %license LICENSE
 
 %changelog
+# REMOVEME: error caused by commit http://git.openstack.org/cgit/openstack/python-openstackclient/commit/?id=57edf1647d7df3032c99c57633e4b2e75514acf9
