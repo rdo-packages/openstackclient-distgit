@@ -76,7 +76,7 @@ BuildRequires:    python%{pyver}-requests-mock
 # Required to compile translation files
 BuildRequires:    python%{pyver}-babel
 # Required for unit tests
-BuildRequires:    python%{pyver}-os-testr
+BuildRequires:    python%{pyver}-stestr
 BuildRequires:    python%{pyver}-osc-lib-tests
 BuildRequires:    python%{pyver}-fixtures
 BuildRequires:    python%{pyver}-oslotest
@@ -168,7 +168,7 @@ rm -rf %{buildroot}%{pyver_sitelib}/%{sname}/locale
 
 %check
 export PYTHON=%{__python}
-%{pyver_bin} setup.py test
+stestr-%{pyver} run
 
 %files -n python%{pyver}-%{sname}
 %license LICENSE
