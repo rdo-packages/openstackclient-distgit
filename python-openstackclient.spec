@@ -87,13 +87,13 @@ BuildRequires:    python%{pyver}-osprofiler
 
 Requires:         python%{pyver}-pbr
 Requires:         python%{pyver}-babel
-Requires:         python%{pyver}-openstacksdk >= 0.11.2
+Requires:         python%{pyver}-openstacksdk >= 0.17.0
 Requires:         python%{pyver}-oslo-i18n >= 3.15.3
 Requires:         python%{pyver}-oslo-utils >= 3.33.0
 Requires:         python%{pyver}-glanceclient >= 1:2.8.0
-Requires:         python%{pyver}-keystoneauth1 >= 3.4.0
+Requires:         python%{pyver}-keystoneauth1 >= 3.6.2
 Requires:         python%{pyver}-keystoneclient >= 1:3.17.0
-Requires:         python%{pyver}-novaclient >= 9.1.0
+Requires:         python%{pyver}-novaclient >= 10.0.0
 Requires:         python%{pyver}-cinderclient >= 3.3.0
 Requires:         python%{pyver}-neutronclient >= 6.7.0
 Requires:         python%{pyver}-six >= 1.10.0
