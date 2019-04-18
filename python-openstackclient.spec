@@ -9,7 +9,7 @@
 %global client openstackclient
 
 Name:             python-openstackclient
-Version:          3.12.1
+Version:          3.12.2
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -243,6 +243,9 @@ rm -rf .testrepository
 %{python3_sitelib}/*.egg-info
 %endif
 %changelog
+* Thu Apr 18 2019 RDO <dev@lists.rdoproject.org> 3.12.2-1
+- Update to 3.12.2
+
 * Tue Apr 03 2018 RDO <dev@lists.rdoproject.org> 3.12.1-1
 - Update to 3.12.1
 
