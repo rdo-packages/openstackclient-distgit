@@ -189,3 +189,4 @@ stestr-%{pyver} run
 %license LICENSE
 
 %changelog
+# REMOVEME: error caused by commit http://git.openstack.org/cgit/openstack/python-openstackclient/commit/?id=bdf129b15f17ba2bce161ed8813dd888e6e0fb3e
