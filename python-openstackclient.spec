@@ -93,11 +93,11 @@ Requires:         python%{pyver}-oslo-utils >= 3.33.0
 Requires:         python%{pyver}-glanceclient >= 1:2.8.0
 Requires:         python%{pyver}-keystoneauth1 >= 3.6.2
 Requires:         python%{pyver}-keystoneclient >= 1:3.17.0
-Requires:         python%{pyver}-novaclient >= 10.0.0
+Requires:         python%{pyver}-novaclient >= 1:15.0.0
 Requires:         python%{pyver}-cinderclient >= 3.3.0
 Requires:         python%{pyver}-neutronclient >= 6.7.0
 Requires:         python%{pyver}-six >= 1.10.0
-Requires:         python%{pyver}-osc-lib >= 1.10.0
+Requires:         python%{pyver}-osc-lib >= 1.14.0
 Requires:         python%{pyver}-cliff
 
 Requires:         python-%{sname}-lang = %{version}-%{release}
