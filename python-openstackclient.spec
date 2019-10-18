@@ -66,10 +66,8 @@ BuildRequires:    python%{pyver}-os-client-config
 BuildRequires:    python%{pyver}-cliff
 BuildRequires:    python%{pyver}-simplejson
 %if %{pyver} == 2
-BuildRequires:    python-d2to1
 BuildRequires:    python-requests-mock
 %else
-BuildRequires:    python%{pyver}-d2to1
 BuildRequires:    python%{pyver}-requests-mock
 %endif
 
