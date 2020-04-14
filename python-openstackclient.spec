@@ -46,9 +46,7 @@ BuildRequires:    openstack-macros
 %package -n python%{pyver}-%{sname}
 Summary:    OpenStack Command-line Client
 %{?python_provide:%python_provide python%{pyver}-%{sname}}
-%if %{pyver} == 3
 Obsoletes: python2-%{sname} < %{version}-%{release}
-%endif
 
 BuildRequires:    python%{pyver}-devel
 BuildRequires:    python%{pyver}-setuptools
@@ -57,7 +55,6 @@ BuildRequires:    python%{pyver}-six
 BuildRequires:    python%{pyver}-oslo-i18n
 BuildRequires:    python%{pyver}-oslo-utils
 BuildRequires:    python%{pyver}-requests
-BuildRequires:    python%{pyver}-glanceclient
 BuildRequires:    python%{pyver}-keystoneclient
 BuildRequires:    python%{pyver}-novaclient
 BuildRequires:    python%{pyver}-cinderclient
@@ -65,11 +62,7 @@ BuildRequires:    python%{pyver}-mock
 BuildRequires:    python%{pyver}-os-client-config
 BuildRequires:    python%{pyver}-cliff
 BuildRequires:    python%{pyver}-simplejson
-%if %{pyver} == 2
-BuildRequires:    python-requests-mock
-%else
 BuildRequires:    python%{pyver}-requests-mock
-%endif
 
 # Required to compile translation files
 BuildRequires:    python%{pyver}-babel
@@ -85,17 +78,15 @@ BuildRequires:    python%{pyver}-osprofiler
 
 Requires:         python%{pyver}-pbr
 Requires:         python%{pyver}-babel
-Requires:         python%{pyver}-openstacksdk >= 0.17.0
+Requires:         python%{pyver}-openstacksdk >= 0.44.0
 Requires:         python%{pyver}-oslo-i18n >= 3.15.3
 Requires:         python%{pyver}-oslo-utils >= 3.33.0
-Requires:         python%{pyver}-glanceclient >= 1:2.8.0
-Requires:         python%{pyver}-keystoneauth1 >= 3.6.2
-Requires:         python%{pyver}-keystoneclient >= 1:3.17.0
-Requires:         python%{pyver}-novaclient >= 1:15.0.0
+Requires:         python%{pyver}-keystoneclient >= 1:3.22.0
+Requires:         python%{pyver}-novaclient >= 1:15.1.0
 Requires:         python%{pyver}-cinderclient >= 3.3.0
 Requires:         python%{pyver}-neutronclient >= 6.7.0
 Requires:         python%{pyver}-six >= 1.10.0
-Requires:         python%{pyver}-osc-lib >= 1.14.0
+Requires:         python%{pyver}-osc-lib >= 2.0.0
 Requires:         python%{pyver}-cliff
 
 Requires:         python-%{sname}-lang = %{version}-%{release}
