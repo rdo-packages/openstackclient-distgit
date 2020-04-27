@@ -14,8 +14,8 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-%{sname}
-Version:          XXX
-Release:          XXX
+Version:          5.2.0
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
@@ -166,3 +166,6 @@ stestr run
 %license LICENSE
 
 %changelog
+* Mon Apr 27 2020 RDO <dev@lists.rdoproject.org> 5.2.0-1
+- Update to 5.2.0
+
