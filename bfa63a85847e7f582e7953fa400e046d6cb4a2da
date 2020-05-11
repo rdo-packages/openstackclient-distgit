@@ -34,6 +34,23 @@
       "revId": "bfa63a85847e7f582e7953fa400e046d6cb4a2da",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25e6e69f_8333e900",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 303
+      },
+      "writtenOn": "2020-05-11T13:27:51Z",
+      "side": 1,
+      "message": "We have a tripleo install-all-the-clients service. So if you want this in a tripleo deployment, add it there and not here.",
+      "revId": "bfa63a85847e7f582e7953fa400e046d6cb4a2da",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
