@@ -76,6 +76,7 @@ Requires:         python3-neutronclient >= 6.7.0
 Requires:         python3-six >= 1.10.0
 Requires:         python3-osc-lib >= 2.0.0
 Requires:         python3-cliff
+Requires:         python3-osc-placement
 
 Requires:         python-%{sname}-lang = %{version}-%{release}
 
