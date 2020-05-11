@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb6b2ba7_a27b2fa3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2020-05-11T10:04:49Z",
+      "side": 1,
+      "message": "openstackclient doesn\u0027t seem the right candidate considering osc-placement is osc plugin, shouldn\u0027t it go with tripleoclient or with tripleo framework to get into overcloud nodes?",
+      "revId": "bfa63a85847e7f582e7953fa400e046d6cb4a2da",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
