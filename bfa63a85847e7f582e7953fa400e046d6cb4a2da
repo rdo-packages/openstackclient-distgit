@@ -16,6 +16,24 @@
       "revId": "bfa63a85847e7f582e7953fa400e046d6cb4a2da",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d5393fb7_e48f6b02",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 142
+      },
+      "writtenOn": "2020-05-11T10:43:57Z",
+      "side": 1,
+      "message": "I had initially drafted a change to tripleoclient for this but that wouldn\u0027t cover users installing osc outside of an env.\n\nWhile I agree that this is awkward it does ensure the plugin is installed in such cases *and* also on the undercloud. Having the plugin and osc in general installed on the overcloud could be useful but ultimately isn\u0027t the goal here.\n\nI can rewrite the following section to make that clear.",
+      "parentUuid": "eb6b2ba7_a27b2fa3",
+      "revId": "bfa63a85847e7f582e7953fa400e046d6cb4a2da",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
