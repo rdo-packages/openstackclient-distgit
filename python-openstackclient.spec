@@ -61,7 +61,6 @@ BuildRequires:    python3-oslotest
 BuildRequires:    python3-reno
 BuildRequires:    python3-requestsexceptions
 BuildRequires:    python3-openstacksdk
-BuildRequires:    python3-osprofiler
 BuildRequires:    python3-ddt
 
 Requires:         python3-pbr
