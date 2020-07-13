@@ -114,7 +114,7 @@ Translation files for Openstackclient
 %{py3_build}
 
 # Generate i18n files
-%{__python3} setup.py compile_catalog -d build/lib/%{sname}/locale
+%{__python3} setup.py compile_catalog -d build/lib/%{sname}/locale --domain openstackclient
 
 %install
 %{py3_install}
