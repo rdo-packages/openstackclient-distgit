@@ -71,6 +71,7 @@ Requires:         python3-keystoneclient >= 1:3.22.0
 Requires:         python3-novaclient >= 1:15.1.0
 Requires:         python3-cinderclient >= 3.3.0
 Requires:         python3-neutronclient >= 6.7.0
+Requires:         python3-osc-placement >= 1.7.0
 Requires:         python3-six >= 1.10.0
 Requires:         python3-osc-lib >= 2.0.0
 Requires:         python3-cliff
