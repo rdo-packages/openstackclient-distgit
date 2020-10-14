@@ -1,3 +1,5 @@
+%{!?sources_gpg: %{!?dlrn:%global sources_gpg 1} }
+%global sources_gpg_sign 0x2426b928085a020d8a90d0d879ab7008d0896c8a
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 
 # Command name
@@ -15,14 +17,24 @@ actual REST API client actions.
 
 Name:             python-%{sname}
 Version:          5.4.0
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
 URL:              http://launchpad.net/%{name}
 Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
+# Required for tarball sources verification
+%if 0%{?sources_gpg} == 1
+Source101:        https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz.asc
+Source102:        https://releases.openstack.org/_static/%{sources_gpg_sign}.txt
+%endif
 
 BuildArch:        noarch
+
+# Required for tarball sources verification
+%if 0%{?sources_gpg} == 1
+BuildRequires:  /usr/bin/gpgv2
+%endif
 
 BuildRequires:    git
 BuildRequires:    openstack-macros
@@ -105,6 +117,10 @@ Summary:   Translation files for Openstackclient
 Translation files for Openstackclient
 
 %prep
+# Required for tarball sources verification
+%if 0%{?sources_gpg} == 1
+%{gpgverify}  --keyring=%{SOURCE102} --signature=%{SOURCE101} --data=%{SOURCE0}
+%endif
 %autosetup -n %{name}-%{upstream_version} -S git
 
 # We handle requirements ourselves, pkg_resources only bring pain
@@ -165,6 +181,9 @@ stestr run
 %license LICENSE
 
 %changelog
+* Wed Oct 21 2020 Joel Capitao <jcapitao@redhat.com> 5.4.0-2
+- Enable sources tarball validation using GPG signature.
+
 * Mon Oct 05 2020 RDO <dev@lists.rdoproject.org> 5.4.0-1
 - Update to 5.4.0
 
