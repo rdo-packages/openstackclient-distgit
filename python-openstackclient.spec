@@ -100,6 +100,8 @@ Requires:         python%{pyver}-cliff
 
 Requires:         python-%{sname}-lang = %{version}-%{release}
 
+# Dependency for auto-completion
+Recommends:         bash-completion
 
 %description -n python%{pyver}-%{sname}
 %{common_desc}
@@ -163,6 +165,10 @@ rm -rf %{buildroot}%{pyver_sitelib}/%{sname}/locale
 
 # Find language files
 %find_lang %{sname} --all-name
+
+%post -n python3-%{sname}
+mkdir -p /etc/bash_completion.d
+openstack complete | sed -n '/_openstack/,$p' | tee /etc/bash_completion.d/osc.bash_completion
 
 %check
 export PYTHON=%{__python}
