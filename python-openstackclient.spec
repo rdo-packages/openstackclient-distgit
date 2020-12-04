@@ -90,6 +90,8 @@ Requires:         python3-cliff
 Requires:         python-%{sname}-lang = %{version}-%{release}
 Requires:         python3-stevedore >= 2.0.1
 
+# Dependency for auto-completion
+Recommends:         bash-completion
 
 %description -n python3-%{sname}
 %{common_desc}
@@ -157,6 +159,10 @@ rm -rf %{buildroot}%{python3_sitelib}/%{sname}/locale
 
 # Find language files
 %find_lang %{sname} --all-name
+
+%post -n python3-%{sname}
+mkdir -p /etc/bash_completion.d
+openstack complete | sed -n '/_openstack/,$p' | tee /etc/bash_completion.d/osc.bash_completion
 
 %check
 export PYTHON=%{__python3}
