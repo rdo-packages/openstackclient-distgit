@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f6d7591_a0e67807",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 303
+      },
+      "writtenOn": "2020-12-04T17:15:21Z",
+      "side": 1,
+      "message": "Recommends",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 8
+      },
+      "revId": "a5b09eaa6e09da74c68ec4b5c7d65c24b8c2ef73",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
