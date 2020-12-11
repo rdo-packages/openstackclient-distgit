@@ -22,6 +22,40 @@
       "revId": "a5b09eaa6e09da74c68ec4b5c7d65c24b8c2ef73",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "87102676_66dcb314",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2020-12-11T10:40:59Z",
+      "side": 1,
+      "message": "-n python3-%{sname}",
+      "revId": "a5b09eaa6e09da74c68ec4b5c7d65c24b8c2ef73",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "403e61a7_8048882d",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2020-12-11T10:40:59Z",
+      "side": 1,
+      "message": "-n python3-%{sname}",
+      "revId": "a5b09eaa6e09da74c68ec4b5c7d65c24b8c2ef73",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
