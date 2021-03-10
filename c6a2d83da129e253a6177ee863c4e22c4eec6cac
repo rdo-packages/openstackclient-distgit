@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2239062b_a8f923b2",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2021-03-10T08:12:36Z",
+      "side": 1,
+      "message": "Missing novaclient update?\n\n| MISMATCH:\n|    python-novaclient \u003e\u003d 17.0.0  (\u003e\u003d 15.1.0 in .spec)",
+      "range": {
+        "startLine": 83,
+        "startChar": 19,
+        "endLine": 83,
+        "endChar": 48
+      },
+      "revId": "c6a2d83da129e253a6177ee863c4e22c4eec6cac",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
