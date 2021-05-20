@@ -28,6 +28,9 @@ Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_vers
 Source101:        https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz.asc
 Source102:        https://releases.openstack.org/_static/%{sources_gpg_sign}.txt
 %endif
+%if 0%{?rhel} > 8
+Patch01:          0001-Replace-assertItemsEqual-with-assertCountEqual.patch
+%endif
 
 BuildArch:        noarch
 
