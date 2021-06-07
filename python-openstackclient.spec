@@ -94,7 +94,9 @@ Requires:         python3-stevedore >= 2.0.1
 Requires:         python3-iso8601 >= 0.1.11
 
 # Dependency for auto-completion
+%if 0%{?fedora} || 0%{?rhel} > 7
 Recommends:         bash-completion
+%endif
 
 %description -n python3-%{sname}
 %{common_desc}
