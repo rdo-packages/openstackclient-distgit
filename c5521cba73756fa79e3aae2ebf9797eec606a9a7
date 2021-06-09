@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98212810_79e1e4a0",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2021-06-09T05:05:39Z",
+      "side": 1,
+      "message": "can use conditionals for rhel8 for Requires vs Recommends with %if 0%{?fedora} || 0%{?rhel} \u003e 7.",
+      "revId": "c5521cba73756fa79e3aae2ebf9797eec606a9a7",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b9addfa_ca23d94c",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2021-06-09T05:05:39Z",
+      "side": 1,
+      "message": "python%{pyver}",
+      "range": {
+        "startLine": 169,
+        "startChar": 9,
+        "endLine": 169,
+        "endChar": 16
+      },
+      "revId": "c5521cba73756fa79e3aae2ebf9797eec606a9a7",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    }
+  ]
+}
