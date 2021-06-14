@@ -146,7 +146,7 @@ rm -rf %{buildroot}%{python3_sitelib}/%{sname}/locale
 
 %post -n python3-%{sname}
 mkdir -p /etc/bash_completion.d
-openstack complete | sed -n '/_openstack/,$p' | tee /etc/bash_completion.d/osc.bash_completion
+openstack complete | sed -n '/_openstack/,$p' > /etc/bash_completion.d/osc.bash_completion
 
 %check
 export PYTHON=%{__python3}
