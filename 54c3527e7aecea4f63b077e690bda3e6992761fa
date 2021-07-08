@@ -69,6 +69,30 @@
       "revId": "54c3527e7aecea4f63b077e690bda3e6992761fa",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0ae3d9f7_872db43f",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2021-07-08T14:59:50Z",
+      "side": 1,
+      "message": "sorry, i didn\u0027t see those coming :)\n\nMerging, I\u0027ll merge this as-is and wait for cherry-pick the silencing one.",
+      "parentUuid": "ff0358cb_bfbf2ef8",
+      "range": {
+        "startLine": 175,
+        "startChar": 46,
+        "endLine": 175,
+        "endChar": 51
+      },
+      "revId": "54c3527e7aecea4f63b077e690bda3e6992761fa",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
     }
   ]
 }
