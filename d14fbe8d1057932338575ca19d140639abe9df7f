@@ -1,0 +1,9 @@
+Code-Review+2: Yatin Karel <ykarel@redhat.com>
+Code-Review+2: Alfredo Moralejo <amoralej@redhat.com>
+Workflow+1: Alfredo Moralejo <amoralej@redhat.com>
+Verified+2: Zuul CI <zuul@review.rdoproject.org>
+Submitted-by: Zuul CI <zuul@review.rdoproject.org>
+Submitted-at: Thu, 08 Jul 2021 15:10:28 +0000
+Reviewed-on: https://review.rdoproject.org/r/c/openstack/openstackclient-distgit/+/34112
+Project: openstack/openstackclient-distgit
+Branch: refs/heads/wallaby-rdo
