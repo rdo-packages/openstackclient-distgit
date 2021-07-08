@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "00131b01_7206cf55",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 4
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2021-07-08T08:35:33Z",
+      "side": 1,
+      "message": "This shouldn\u0027t be needed as it created by bash-completion but anyway not a problem.",
+      "range": {
+        "startLine": 174,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 1
+      },
+      "revId": "54c3527e7aecea4f63b077e690bda3e6992761fa",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2ed6644_881f0076",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2021-07-08T08:35:33Z",
+      "side": 1,
+      "message": "This is adding quite much uneeded output to dnf install python3-openstackclient, could we replace | tee by a simple output redirection?",
+      "range": {
+        "startLine": 175,
+        "startChar": 46,
+        "endLine": 175,
+        "endChar": 51
+      },
+      "revId": "54c3527e7aecea4f63b077e690bda3e6992761fa",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    }
+  ]
+}
