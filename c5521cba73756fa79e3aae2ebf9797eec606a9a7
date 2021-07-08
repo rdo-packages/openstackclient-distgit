@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "21e0cfc0_aa2629a7",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2021-07-08T07:59:06Z",
+      "side": 1,
+      "message": "Updated in PS4 to what i meant, PS3 was similar to PS2, Let it be Recommends for C8+ as ussuri+ release also using same.",
+      "parentUuid": "ca0349b3_1e440743",
+      "revId": "c5521cba73756fa79e3aae2ebf9797eec606a9a7",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b9addfa_ca23d94c",
         "filename": "python-openstackclient.spec",
         "patchSetId": 2
