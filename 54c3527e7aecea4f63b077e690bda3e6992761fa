@@ -45,6 +45,30 @@
       "revId": "54c3527e7aecea4f63b077e690bda3e6992761fa",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ff0358cb_bfbf2ef8",
+        "filename": "python-openstackclient.spec",
+        "patchSetId": 4
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 303
+      },
+      "writtenOn": "2021-07-08T13:08:29Z",
+      "side": 1,
+      "message": "On that note, can you merge https://review.rdoproject.org/r/q/Iff55a7939974212bb80976d78d1a680eb35ce2fb which does this? :D",
+      "parentUuid": "c2ed6644_881f0076",
+      "range": {
+        "startLine": 175,
+        "startChar": 46,
+        "endLine": 175,
+        "endChar": 51
+      },
+      "revId": "54c3527e7aecea4f63b077e690bda3e6992761fa",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
     }
   ]
 }
