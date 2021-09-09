@@ -28,9 +28,6 @@ Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_vers
 Source101:        https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz.asc
 Source102:        https://releases.openstack.org/_static/%{sources_gpg_sign}.txt
 %endif
-%if 0%{?rhel} > 8
-Patch01:          0001-Replace-assertItemsEqual-with-assertCountEqual.patch
-%endif
 
 BuildArch:        noarch
 
@@ -132,6 +129,11 @@ Translation files for Openstackclient
 
 # We handle requirements ourselves, pkg_resources only bring pain
 %py_req_cleanup
+
+# (TODO) Remove this sed after fix is merged upstream
+# https://review.opendev.org/c/openstack/python-openstackclient/+/808079
+# Replace assertItemsEqual by assertCountEqual in test_volume_messages.py file
+sed -i 's/assertItemsEqual/assertCountEqual/g' ./openstackclient/tests/unit/volume/v3/test_volume_message.py
 
 %build
 %{py3_build}
