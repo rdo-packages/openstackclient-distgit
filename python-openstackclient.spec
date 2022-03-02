@@ -76,7 +76,7 @@ BuildRequires:    python3-openstacksdk
 BuildRequires:    python3-ddt
 
 Requires:         python3-pbr
-Requires:         python3-openstacksdk >= 0.56.0
+Requires:         python3-openstacksdk >= 0.61.0
 Requires:         python3-oslo-i18n >= 3.15.3
 Requires:         python3-oslo-utils >= 3.33.0
 Requires:         python3-keystoneclient >= 1:3.22.0
