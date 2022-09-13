@@ -1,5 +1,5 @@
 %{!?sources_gpg: %{!?dlrn:%global sources_gpg 1} }
-%global sources_gpg_sign 0x2426b928085a020d8a90d0d879ab7008d0896c8a
+%global sources_gpg_sign 0xa63ea142678138d1bb15f2e303bdfd64dd164087
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 
 # Command name
@@ -16,8 +16,8 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-%{sname}
-Version:          XXX
-Release:          XXX
+Version:          6.0.0
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
@@ -194,3 +194,6 @@ stestr run
 %license LICENSE
 
 %changelog
+* Tue Sep 13 2022 RDO <dev@lists.rdoproject.org> 6.0.0-1
+- Update to 6.0.0
+
