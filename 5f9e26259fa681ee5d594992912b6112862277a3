@@ -33,6 +33,24 @@
       "message": "Note that, unit tests are failing in dlrn build job because it\u0027s actually not building 6.0.0 but latest commit in master (6.0.1.dev5) which includes https://review.opendev.org/c/openstack/python-openstackclient/+/749038 which is not tagged yet.\n\nSo, fortunatelly we actually can live pinned (so far, we should move to current u-c before Zed GA). As workaround i\u0027d make unit tests conditional to only run when version is \u003c\u003d 6.0.0 or something like that.",
       "revId": "5f9e26259fa681ee5d594992912b6112862277a3",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "af3cf98a_5cc43f47",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2022-09-14T14:01:33Z",
+      "side": 1,
+      "message": "Yes, it\u0027s ok for Zed (pinned to 6.0.0). The master job is failing as openstackclient is using, since post-6.0.0, an openstacksdk feature [1] available since 0.100.0 as you mentioned. But we are locked to openstacksdk 0.61.0 since [2].\nI\u0027ll add a conditionnal to ignore test when version \u003e 6.0.0, in order to pass CI here and unblock Zed release preparation. But we\u0027ll be blocked in master at next openstackclient bump release.\n\n[1] https://review.opendev.org/c/openstack/python-openstackclient/+/749038\n[2] https://review.rdoproject.org/r/c/rdoinfo/+/43207",
+      "parentUuid": "4a01ed0a_7f49a660",
+      "revId": "5f9e26259fa681ee5d594992912b6112862277a3",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
