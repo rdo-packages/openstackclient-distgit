@@ -76,11 +76,11 @@ BuildRequires:    python3-openstacksdk
 BuildRequires:    python3-ddt
 
 Requires:         python3-pbr
-Requires:         python3-openstacksdk >= 0.61.0
+Requires:         python3-openstacksdk >= 0.101.0
 Requires:         python3-oslo-i18n >= 3.15.3
 Requires:         python3-oslo-utils >= 3.33.0
 Requires:         python3-keystoneclient >= 1:3.22.0
-Requires:         python3-novaclient >= 1:17.0.0
+Requires:         python3-novaclient >= 1:18.1.0
 Requires:         python3-cinderclient >= 3.3.0
 Requires:         python3-neutronclient >= 6.7.0
 Requires:         python3-osc-lib >= 2.3.0
