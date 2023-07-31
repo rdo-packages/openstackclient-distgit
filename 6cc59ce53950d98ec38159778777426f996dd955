@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37b3b2b9_a1bc5d24",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 128
+      },
+      "writtenOn": "2023-07-31T10:03:39Z",
+      "side": 1,
+      "message": "this is introducing cyclic BR. See python3-openstackclient is introduced as BR in:\n\nhttps://logserver.rdoproject.org/49/49349/6/check/DLRN-rpmbuild-centos9-compare-builddeps/df5034c/job-output.txt\n\nMy guess is that, it\u0027s pulled as dependency for some of the new doc build requirements included in https://github.com/openstack/python-openstackclient/blob/7ea78b6ef65481c8e97bac959b4f11e3ecae8a3e/doc/requirements.txt\n\nIf that\u0027s the case, it would be enough to disable doc building for bootstraping a new repo. Could you test it with a DNM patch on top of this setting with_doc to 0 and see the result of the DLRN-rpmbuild-centos9-compare-builddeps job?\n\n\nWRT losing neutronclient as runtime dep, LGTM",
+      "revId": "6cc59ce53950d98ec38159778777426f996dd955",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
