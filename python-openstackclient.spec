@@ -14,7 +14,7 @@
 # library name
 %global sname %{cname}client
 
-%global with_doc 1
+%global with_doc 0
 
 %global common_desc \
 python-%{sname} is a unified command-line client for the OpenStack APIs. \
