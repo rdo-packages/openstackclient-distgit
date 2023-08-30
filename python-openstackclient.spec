@@ -28,7 +28,7 @@ actual REST API client actions.
 
 Name:             python-%{sname}
 Version:          4.0.2
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          ASL 2.0
