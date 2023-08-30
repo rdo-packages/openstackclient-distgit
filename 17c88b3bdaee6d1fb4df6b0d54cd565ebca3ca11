@@ -16,6 +16,24 @@
       "message": "@Mohammad This patch will not pull any changes into the trunk or cloudsig builds[1].\n4.0.2 was the last tag for openstackclient in stable/train and that\u0027s what pinned in upper-constraints[2]. And in RDO we use upper-constraints for clients and libraries.\nstable/train after moving to extended maintenance phase(in this phase there is no new releases) then have couple of patches https://github.com/openstack/python-openstackclient/compare/4.0.2...stable/train which consist of the patches from the referenced bugzilla.\n\n\n\n[1] More about RDO repos https://www.rdoproject.org/what/repos/\n[2] https://github.com/openstack/requirements/blob/stable/train/upper-constraints.txt",
       "revId": "17c88b3bdaee6d1fb4df6b0d54cd565ebca3ca11",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ba9833c2_979bbedd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2023-08-30T13:27:37Z",
+      "side": 1,
+      "message": "+1\n\nAlso, I see in the BZ \"Fixed in Version python-openstackclient-4.0.2-2.20220111042153.54bf2c0.el8ost\", which is what we have currently in RDO Trunk [1].\n@Mohammad are you hitting issue with current version ?\n\n[1] https://trunk.rdoproject.org/centos8-train/component/clients/current/python3-openstackclient-4.0.2-0.20210709052800.54bf2c0.el8.noarch.rpm",
+      "parentUuid": "2c571f77_d330905b",
+      "revId": "17c88b3bdaee6d1fb4df6b0d54cd565ebca3ca11",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
