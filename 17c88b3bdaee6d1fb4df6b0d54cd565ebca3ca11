@@ -70,6 +70,24 @@
       "parentUuid": "08a4ca85_89b8bc96",
       "revId": "17c88b3bdaee6d1fb4df6b0d54cd565ebca3ca11",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ff9a03e5_e0d6a70e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 85
+      },
+      "writtenOn": "2023-09-05T16:30:24Z",
+      "side": 1,
+      "message": "Referenced rhbz is for OSP16.2 product which includes cherry-picks and/or downstream-only patches on top of 54bf2c0 \u003d\u003d 4.0.2 tag\n\nIn RDO we do not do cherry-picks, per def RDO is RPM packaging of vanilla upstream sources. In this case, problem is that Train is now in Ext.Maint. where the rule is \"No Releases produced\" so no updates to u-c either.\n\nIn any case, rdoinfo pin update is needed and in that case this bump in the RPM spec is not needed, RDO Trunk will pick up the new commit when rdoinfo is updated.",
+      "parentUuid": "8c6a7eb2_6ab62d0b",
+      "revId": "17c88b3bdaee6d1fb4df6b0d54cd565ebca3ca11",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
