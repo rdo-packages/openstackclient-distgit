@@ -2,7 +2,7 @@
 %global sources_gpg_sign 0x2426b928085a020d8a90d0d879ab7008d0896c8a
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 # we are excluding some BRs from automatic generator
-%global excluded_brs doc8 bandit pre-commit hacking flake8-import-order whereto python-zunclient python-watcherclient python-cyborgclient
+%global excluded_brs doc8 bandit pre-commit hacking flake8-import-order whereto python-zunclient python-watcherclient python-cyborgclient python-senlinclient python-muranoclient
 # Exclude sphinx from BRs if docs are disabled
 %if ! 0%{?with_doc}
 %global excluded_brs %{excluded_brs} sphinx openstackdocstheme
