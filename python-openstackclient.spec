@@ -1,5 +1,5 @@
 %{!?sources_gpg: %{!?dlrn:%global sources_gpg 1} }
-%global sources_gpg_sign 0x2ef3fe0ec2b075ab7458b5f8b702b20b13df2318
+%global sources_gpg_sign 0xf8675126e2411e7748dd46662fc2093e4682645f
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 # we are excluding some BRs from automatic generator
 %global excluded_brs doc8 bandit pre-commit hacking flake8-import-order whereto python-zunclient python-watcherclient python-cyborgclient python-senlinclient python-muranoclient python-saharaclient
@@ -22,7 +22,7 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-%{sname}
-Version:          6.6.0
+Version:          6.6.1
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -179,6 +179,9 @@ export PYTHON=%{__python3}
 %license LICENSE
 
 %changelog
+* Fri Aug 02 2024 RDO <dev@lists.rdoproject.org> 6.6.1-1
+- Update to 6.6.1
+
 * Mon Mar 25 2024 RDO <dev@lists.rdoproject.org> 6.6.0-1
 - Update to 6.6.0
 
