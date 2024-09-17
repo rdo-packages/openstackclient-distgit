@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cdc0a439_df7f0734",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2024-09-17T07:02:12Z",
+      "side": 1,
+      "message": "\u003e7.0.0 contains currently a regression https://bugs.launchpad.net/python-openstackclient/+bug/2080600",
+      "revId": "79ce77849705e10fda254a4a8aa036d22f719dad",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
