@@ -16,6 +16,23 @@
       "message": "\u003e7.0.0 contains currently a regression https://bugs.launchpad.net/python-openstackclient/+bug/2080600",
       "revId": "79ce77849705e10fda254a4a8aa036d22f719dad",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f9995559_0e6cc736",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2024-09-19T08:03:38Z",
+      "side": 1,
+      "message": "it was reverted upstream https://review.opendev.org/q/topic:%22block-osc-7.1.0%22",
+      "revId": "79ce77849705e10fda254a4a8aa036d22f719dad",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
