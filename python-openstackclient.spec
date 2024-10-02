@@ -34,6 +34,8 @@ Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_vers
 Patch0001:        0001-identity-in-service-set-command-don-t-pass-the-enabl.patch
 %endif
 
+Patch002:         0001-Always-resolve-domain-id.patch
+
 # Required for tarball sources verification
 %if 0%{?sources_gpg} == 1
 Source101:        https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz.asc
@@ -184,3 +186,4 @@ export PYTHON=%{__python3}
 %license LICENSE
 
 %changelog
+
