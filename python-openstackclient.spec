@@ -23,16 +23,19 @@ actual REST API client actions.
 
 Name:             python-%{sname}
 Version:          7.1.2
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          Apache-2.0
 URL:              http://launchpad.net/%{name}
 Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
-# Patch https://review.opendev.org/c/openstack/python-openstackclient/+/930911 on 7.1.2
 %if %{lua:print(rpm.vercmp(rpm.expand("%{version}"), '7.1.3'));} <= 0
+# Patch https://review.opendev.org/c/openstack/python-openstackclient/+/930911 on 7.1.2
 Patch0001:        0001-identity-in-service-set-command-don-t-pass-the-enabl.patch
+# Patch https://review.opendev.org/c/openstack/python-openstackclient/+/931031 on 7.1.2
+Patch0002:        0001-Always-resolve-domain-id.patch
 %endif
+
 
 # Required for tarball sources verification
 %if 0%{?sources_gpg} == 1
@@ -184,6 +187,9 @@ export PYTHON=%{__python3}
 %license LICENSE
 
 %changelog
+* Thu Oct 01 2024 Alfredo Moralejo <amoralej@redhat.com> 7.1.2-3
+- Always resolve domain id
+
 * Tue Oct 01 2024 Alfredo Moralejo <amoralej@redhat.com> 7.1.2-2
 - identity: in `service set` command, don't pass the enable option when it is None
 
