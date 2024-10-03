@@ -16,6 +16,23 @@
       "message": "recheck",
       "revId": "42c111f92313e45a393501a9526c6b4c64a2b185",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b283275_6765134a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2024-10-03T08:48:43Z",
+      "side": 1,
+      "message": "we are in a chicken-and-eggs situation where this patch needs latest puppet-keystone commit to be promoted, but w/o this patch the promotion is failing",
+      "revId": "42c111f92313e45a393501a9526c6b4c64a2b185",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
