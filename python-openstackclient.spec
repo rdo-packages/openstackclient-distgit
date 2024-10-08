@@ -7,6 +7,10 @@
 %if ! 0%{?with_doc}
 %global excluded_brs %{excluded_brs} sphinx openstackdocstheme
 %endif
+# Exclude some BRs for Fedora
+%if 0%{?fedora}
+%global excluded_brs %{excluded_brs} tempest osc-placement python-ironic-inspector-client osprofiler
+%endif
 
 # Command name
 %global cname openstack
@@ -62,6 +66,9 @@ Summary:    OpenStack Command-line Client
 BuildRequires:    python3-devel
 BuildRequires:    pyproject-rpm-macros
 BuildRequires:    python3-osc-lib-tests
+# Required to compile translation files
+BuildRequires:    python3-babel
+
 Requires:         python-%{sname}-lang = %{version}-%{release}
 # Dependency for auto-completion
 %if 0%{?fedora} || 0%{?rhel} > 7
