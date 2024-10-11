@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa55b5bd_a2a67630",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2024-10-11T12:48:22Z",
+      "side": 1,
+      "message": "We should also bump the release and appaend the changelog section\nAlso, could you submit similar patch to rpm-master ?",
+      "revId": "18013ac41cdd5ee5b0ef27fc6af7778b69ef5b31",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
