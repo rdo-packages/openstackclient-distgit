@@ -29,12 +29,6 @@ Summary:          OpenStack Command-line Client
 License:          Apache-2.0
 URL:              http://launchpad.net/%{name}
 Source0:          https://tarballs.openstack.org/%{name}/%{name}-%{upstream_version}.tar.gz
-%if %{lua:print(rpm.vercmp(rpm.expand("%{version}"), '7.1.3'));} <= 0
-# Patch https://review.opendev.org/c/openstack/python-openstackclient/+/930911 on 7.1.2
-Patch0001:        0001-identity-in-service-set-command-don-t-pass-the-enabl.patch
-# Patch https://review.opendev.org/c/openstack/python-openstackclient/+/931031 on 7.1.2
-Patch0002:        0001-Always-resolve-domain-id.patch
-%endif
 
 
 # Required for tarball sources verification
