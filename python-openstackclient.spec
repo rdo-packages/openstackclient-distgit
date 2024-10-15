@@ -22,8 +22,8 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-%{sname}
-Version:          7.1.2
-Release:          3%{?dist}
+Version:          7.1.3
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          Apache-2.0
@@ -181,6 +181,9 @@ export PYTHON=%{__python3}
 %license LICENSE
 
 %changelog
+* Tue Oct 15 2024 RDO <dev@lists.rdoproject.org> 7.1.3-1
+- Update to 7.1.3
+
 * Thu Oct 01 2024 Alfredo Moralejo <amoralej@redhat.com> 7.1.2-3
 - Always resolve domain id
 
