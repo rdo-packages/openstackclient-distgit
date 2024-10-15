@@ -1,5 +1,5 @@
 %{!?sources_gpg: %{!?dlrn:%global sources_gpg 1} }
-%global sources_gpg_sign 0xf8675126e2411e7748dd46662fc2093e4682645f
+%global sources_gpg_sign 0x22284f69d9eccdf3df7819791c711af193ff8e54
 %{!?upstream_version: %global upstream_version %{version}%{?milestone}}
 # we are excluding some BRs from automatic generator
 %global excluded_brs doc8 bandit pre-commit hacking flake8-import-order whereto python-zunclient python-watcherclient python-cyborgclient python-senlinclient python-muranoclient python-saharaclient
@@ -22,8 +22,8 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-%{sname}
-Version:          7.1.2
-Release:          3%{?dist}
+Version:          7.1.3
+Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
 License:          Apache-2.0
@@ -181,6 +181,9 @@ export PYTHON=%{__python3}
 %license LICENSE
 
 %changelog
+* Tue Oct 15 2024 RDO <dev@lists.rdoproject.org> 7.1.3-1
+- Update to 7.1.3
+
 * Thu Oct 01 2024 Alfredo Moralejo <amoralej@redhat.com> 7.1.2-3
 - Always resolve domain id
 
