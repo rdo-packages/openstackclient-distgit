@@ -55,7 +55,9 @@ BuildRequires:  /usr/bin/gpgv2
 %endif
 
 BuildRequires:    git-core
+%if 0%{?fedora} == 0 || 0%{?epel} == 0
 BuildRequires:    openstack-macros
+%endif
 
 %description
 %{common_desc}
