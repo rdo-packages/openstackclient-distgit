@@ -55,7 +55,9 @@ BuildRequires:  /usr/bin/gpgv2
 %endif
 
 BuildRequires:    git-core
+%if 0%{?rhel} && ! 0%{?epel}
 BuildRequires:    openstack-macros
+%endif
 
 %description
 %{common_desc}
