@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c45d126a_4e20c2cb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 981
+      },
+      "writtenOn": "2025-01-10T15:01:50Z",
+      "side": 1,
+      "message": "https://bugs.launchpad.net/python-openstackclient/+bug/2091590",
+      "revId": "d38453d0dc6e9f3a43d912568403f49a3fbdd63b",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
