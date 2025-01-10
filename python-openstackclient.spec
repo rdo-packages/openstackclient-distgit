@@ -66,6 +66,7 @@ Summary:    OpenStack Command-line Client
 BuildRequires:    python3-devel
 BuildRequires:    pyproject-rpm-macros
 BuildRequires:    python3-osc-lib-tests
+Requires:         python3-chardet
 # Required to compile translation files
 BuildRequires:    python3-babel
 
