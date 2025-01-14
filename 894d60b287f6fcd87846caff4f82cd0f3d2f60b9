@@ -34,6 +34,24 @@
       "parentUuid": "05aaf47d_1c1b05a2",
       "revId": "894d60b287f6fcd87846caff4f82cd0f3d2f60b9",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "66b9f6e0_aec07436",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 981
+      },
+      "writtenOn": "2025-01-14T13:27:41Z",
+      "side": 1,
+      "message": "Joel hello, simple after install from pip3 - problem not confirmed, only via package, thanks for you reply.",
+      "parentUuid": "4810f13b_4714b4e8",
+      "revId": "894d60b287f6fcd87846caff4f82cd0f3d2f60b9",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
