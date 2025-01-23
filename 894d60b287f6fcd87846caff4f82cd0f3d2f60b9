@@ -70,6 +70,24 @@
       "parentUuid": "66b9f6e0_aec07436",
       "revId": "894d60b287f6fcd87846caff4f82cd0f3d2f60b9",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "76bafe7b_0b3cc488",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 635
+      },
+      "writtenOn": "2025-01-23T18:00:38Z",
+      "side": 1,
+      "message": "also, you can get all info of a RPM with the `rdopkg findpkg $project` command\ne.g `rdopkg findpkg python-requests`\n\nThere is more information in the webpage https://www.rdoproject.org/contribute/requirements/#adding-a-new-requirement-to-rdo",
+      "parentUuid": "4b5c2f9c_bc0813ef",
+      "revId": "894d60b287f6fcd87846caff4f82cd0f3d2f60b9",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
