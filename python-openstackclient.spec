@@ -197,3 +197,4 @@ export PYTHON=%{__python3}
 
 %changelog
 
+# REMOVEME: error caused by commit https://opendev.org/openstack/python-openstackclient/commit/88b59d89754238d8d56609950ff5cfc92344cf4c
