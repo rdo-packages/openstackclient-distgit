@@ -28,7 +28,7 @@ It is a thin wrapper to the stock python-*client modules that implement the \
 actual REST API client actions.
 
 Name:             python-%{sname}
-Version:          7.4.0
+Version:          7.5.0
 Release:          1%{?dist}
 Summary:          OpenStack Command-line Client
 
@@ -196,6 +196,9 @@ export PYTHON=%{__python3}
 %license LICENSE
 
 %changelog
+* Mon Jul 21 2025 RDO <dev@lists.rdoproject.org> 7.5.0-1
+- Update to 7.5.0
+
 * Mon Mar 17 2025 RDO <dev@lists.rdoproject.org> 7.4.0-1
 - Update to 7.4.0
 
